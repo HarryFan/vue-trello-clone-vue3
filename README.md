@@ -1,47 +1,10 @@
 # Vue Trello Clone (Vue 3 + Vite)
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
-
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
-
-## 下一步待辦（回台北後建議繼續進行）
-
-### 1. 元件搬遷與重構
-- 將原 Vue2 專案的主要元件（Board、Card、CardDetail、UiItemForm 等）搬移到 `src/components`、`src/views`
-- 搬移時同步升級語法為 Vue 3（優先 `<script setup>` 與 Composition API）
-- 調整 v-model、事件、slot、emit、props 等為 Vue 3 標準
-- 移除/替換 Vue 2 已棄用 API
-
-### 2. 狀態管理與資料流
-- 原本 Vuex 狀態搬遷到 Pinia（`src/stores`）
-- 將任務、清單、卡片等資料管理邏輯集中於 Pinia Store
-
-### 3. 路由與頁面
-- 完善 `src/router/index.js`，根據需求新增多頁面（如卡片詳情、設定等）
-
-### 4. Element Plus UI 套件整合
-- 將原有按鈕、彈窗、表單等元件改用 Element Plus 元件
-- 調整樣式與互動，確保一致性
-
-### 5. API/資料串接
-- 若有 axios/fetch 資料存取，集中到 `src/services` 或 `src/apis`
-- 測試本地資料流與 API 串接
-
-### 6. 全站樣式搬遷
-- 將原 SCSS/CSS 主題搬移到新專案
-- 若有全域變數，建議放在 `src/assets/styles` 並於 main.js 匯入
-
-### 7. 功能測試與優化
-- 每搬一個模組就局部測試，確保主流程可用
-- 逐步優化元件結構與效能
-
-### 8. 其他建議
-- 加入 ESLint + Prettier，保持程式碼一致性
-- README 補充專案架構、啟動指令、遷移注意事項
+本專案為 Vue 2 Trello 任務管理板的 Vue 3 + Vite 全新重構版，UI 採用 Element Plus，狀態管理改用 Pinia，所有資料皆支援 localStorage 持久化。
 
 ---
 
-## 啟動專案
+## 快速啟動
 ```bash
 npm install
 npm run dev
@@ -49,4 +12,40 @@ npm run dev
 
 ---
 
-**祝順利完成 Vue 3 翻新！如有任何問題歡迎隨時詢問。**
+## 近期進度與開發備忘
+- 已完成主要元件遷移（BoardView、Card、CardDetail、UiItemForm）
+- 狀態管理已改為 Pinia，lists/task 支援 localStorage
+- 表單新增/編輯整合為 UiItemForm，支援圖片上傳
+- 路由預設進入主看板（/），歡迎頁移至 /welcome
+- 新增 snapshot.py 腳本，可自動產生 snapshot.json，方便查詢現有組件/函式
+- 最新快照已 commit，回台北後可繼續開發
+
+### 開發建議
+- 參考 snapshot.json，避免幻想不存在的 API
+- 如需查詢現有 props、emits、store actions，直接檢索 snapshot.json
+- 若有新元件/資料流，建議同步更新 snapshot
+- 建議持續優化 UI/UX、加強表單驗證、完善圖片管理
+- 可考慮導入 ESLint/Prettier 維持風格一致
+
+---
+
+## 專案架構簡介
+- `src/views/BoardView.vue`：主看板頁
+- `src/components/UiItemForm.vue`：新增/編輯卡片表單
+- `src/components/Card.vue`：卡片展示與操作
+- `src/components/CardDetail.vue`：卡片詳情彈窗
+- `src/stores/board.js`：Pinia 狀態管理
+- `src/router/index.js`：路由設定
+- `snapshot.py`、`snapshot.json`：網站快照工具與快照資料
+
+---
+
+## 下一步待辦（回台北後建議繼續進行）
+- 持續測試所有功能，特別是表單與圖片處理
+- 優化 UI/UX，調整 Element Plus 元件細節
+- 增加單元測試、自動化快照
+- 文件補充與整理（含 snapshot 使用說明）
+
+---
+
+**如需協助或有新想法，歡迎隨時留言！**
