@@ -24,6 +24,7 @@
       <div class="new-list">
         <el-input v-model="newListTitle" placeholder="新增清單" size="small" @keyup.enter="addList" />
         <el-button type="primary" size="small" @click="addList">新增清單</el-button>
+        <div v-if="errorMsg" style="color:#e53935; font-size:13px; margin-top:4px;">{{ errorMsg }}</div>
       </div>
     </div>
 
@@ -57,6 +58,7 @@ const board = useBoardStore()
 const lists = computed(() => board.lists)
 const newListTitle = ref('')
 const newCardText = ref({})
+const errorMsg = ref('')
 
 // 詳情彈窗狀態
 const detailDialog = reactive({
@@ -74,7 +76,14 @@ const formDialog = reactive({
 })
 
 function addList() {
+  errorMsg.value = ''
+  if (!newListTitle.value || !newListTitle.value.trim()) {
+    errorMsg.value = '清單名稱不能為空！'
+    console.warn('新增清單失敗：名稱為空')
+    return
+  }
   board.addList(newListTitle.value)
+  console.log('新增清單', newListTitle.value)
   newListTitle.value = ''
 }
 function deleteList(listId) {
@@ -179,5 +188,23 @@ function onDetailUpdate(updatedItem) {
   min-width: 220px;
   max-width: 260px;
   gap: 6px;
+}
+
+@media (max-width: 768px) {
+  .lists-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .list-container,
+  .new-list {
+    width: 100%;
+    min-width: unset;
+    max-width: unset;
+    box-sizing: border-box;
+  }
+  .board-view {
+    padding: 12px;
+  }
 }
 </style>

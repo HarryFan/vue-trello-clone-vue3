@@ -2,6 +2,13 @@ import { defineStore } from 'pinia'
 
 const STORAGE_KEY = 'trello_lists_v3'
 
+// 預設三清單結構
+export const defaultLists = [
+  { id: 1, title: '待辦', items: [ { id: 11, title: '範例任務1', description: '說明...', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' } ] },
+  { id: 2, title: '進行中', items: [ { id: 21, title: '範例任務2', description: '', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' } ] },
+  { id: 3, title: '完成', items: [] }
+]
+
 function loadLists() {
   try {
     const data = localStorage.getItem(STORAGE_KEY)
@@ -18,30 +25,51 @@ function saveLists(lists) {
 
 export const useBoardStore = defineStore('board', {
   state: () => ({
-    lists: loadLists() || [
-      { id: 1, title: '待辦', items: [ { id: 11, title: '範例任務1', description: '說明...', subItems: [], images: [] } ] },
-      { id: 2, title: '進行中', items: [ { id: 21, title: '範例任務2', description: '', subItems: [], images: [] } ] },
-    ]
+    lists: loadLists() || JSON.parse(JSON.stringify(defaultLists))
   }),
   actions: {
     persist() {
       saveLists(this.lists)
     },
+    resetDefaultLists() {
+      this.lists = JSON.parse(JSON.stringify(defaultLists))
+      this.persist()
+      console.log('[Pinia] 已重設為預設三清單')
+    },
     addList(title) {
-      if (!title || !title.trim()) return
+      console.log('[Pinia] addList called, title:', title)
+      if (!title || !title.trim()) {
+        console.warn('[Pinia] 新增清單失敗：名稱為空')
+        return
+      }
       this.lists.push({ id: Date.now(), title, items: [] })
       this.persist()
+      console.log('[Pinia] 新增清單成功，lists:', this.lists)
     },
     deleteList(listId) {
       this.lists = this.lists.filter(l => l.id !== listId)
       this.persist()
     },
     addCard(listId, title) {
-      if (!title || !title.trim()) return
+      console.log('[Pinia] addCard called, listId:', listId, 'title:', title)
+      if (!title || !title.trim()) {
+        console.warn('[Pinia] 新增卡片失敗：名稱為空')
+        return
+      }
       const list = this.lists.find(l => l.id === listId)
       if (list) {
-        list.items.push({ id: Date.now(), title, description: '', subItems: [], images: [] })
+        list.items.push({
+          id: Date.now(),
+          title,
+          description: '',
+          subItems: [],
+          images: [],
+          createdAt: new Date().toISOString(),
+        })
         this.persist()
+        console.log('[Pinia] 新增卡片成功，list:', list)
+      } else {
+        console.warn('[Pinia] 新增卡片失敗：找不到清單', listId)
       }
     },
     deleteItem(listId, itemId) {

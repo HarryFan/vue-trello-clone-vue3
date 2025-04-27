@@ -48,4 +48,9 @@ npm run dev
 
 ---
 
+## 參考資源
+- [Element Plus 官方元件與圖示總覽](https://element-plus.org/en-US/component/overview.html)
+
+---
+
 **如需協助或有新想法，歡迎隨時留言！**

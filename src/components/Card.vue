@@ -43,12 +43,17 @@ const props = defineProps({
   item: {
     type: Object,
     required: true
+  },
+  listTitle: {
+    type: String,
+    required: true
   }
 })
 
 const cardClasses = computed(() => ({
   'is-due': isDue.value,
   'is-overdue': isOverdue.value,
+  'completed-card': props.listTitle === '完成'
 }))
 
 const timestamp = computed(() => Number(new Date(props.item.date)))
@@ -87,28 +92,45 @@ function toggleSubItem(idx) {
 <style scoped>
 .card {
   position: relative;
-  border-radius: 3px;
-  cursor: default;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 8px #1976d21a, 0 1.5px 4px #b6d4ff33;
+  margin-bottom: 16px;
+  padding: 16px 14px 10px 14px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: 1.5px solid #e3f0fd;
+  cursor: pointer;
+}
+.card.completed-card {
+  background: #f7fafd;
+  color: #b0b0b0;
+  border: 1.5px solid #e0e0e0;
+  filter: grayscale(0.2);
+  opacity: 0.8;
+}
+.card:hover {
+  box-shadow: 0 4px 16px #1976d233, 0 2px 8px #b6d4ff44;
+  transform: translateY(-2px) scale(1.02);
+  border-color: #90caf9;
 }
 .item-title {
   font-weight: bold;
-  font-size: 1.1em;
-  margin-bottom: 2px;
+  font-size: 1.13em;
+  margin-bottom: 6px;
+  color: #1565c0;
 }
 .item-description {
-  font-size: 0.7em;
+  font-size: 0.9em;
+  margin-bottom: 4px;
+  color: #2c3e50;
 }
 .item-timestamp {
-  font-size: 0.68em;
+  font-size: 0.7em;
   color: #8a8a8a;
-  margin-top: 2px;
+  margin-top: 4px;
 }
-.timestamp-label {
-  font-weight: bold;
-  color: #b0b0b0;
-}
-.timestamp-value {
-  font-family: monospace;
+.subitems {
+  margin: 6px 0 0 0;
 }
 .icons {
   position: absolute;
@@ -132,35 +154,34 @@ function toggleSubItem(idx) {
   color: #DDD;
 }
 .icon-edit, .icon-delete {
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  font-size: 1.1em;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  margin: 0;
-  padding: 0;
+  width: 28px;
+  height: 28px;
+  font-size: 1.18em;
+  background: #f6faff;
+  border-radius: 50%;
+  margin: 0 2px;
+  border: 1px solid #e3f0fd;
+  transition: background 0.15s, box-shadow 0.15s;
+  box-shadow: 0 1px 3px #1976d21a;
+  cursor: pointer;
 }
 .icon-edit {
-  color: #b0b0b0;
-  margin-right: 0;
+  color: #1976d2;
+}
+.icon-edit:hover {
+  background: #e3f2fd;
+  box-shadow: 0 2px 8px #1976d233;
 }
 .icon-delete {
   color: #e57373;
-  margin-left: 2px;
-  transition: color 0.2s;
 }
 .icon-delete:hover {
+  background: #ffebee;
   color: #c62828;
-}
-.subitems {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin: 4px 0 0 0;
+  box-shadow: 0 2px 8px #ffcdd233;
 }
 .subitem-row {
   display: flex;

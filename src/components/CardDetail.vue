@@ -44,7 +44,9 @@
       <label class="card-detail__label">細項</label>
       <div class="subitems">
         <div v-for="(sub, idx) in editSubItems" :key="sub.id" class="subitem-row">
-          <el-checkbox v-model="editSubItems[idx].isCompleted" @change="emitUpdate()">{{ sub.text }}</el-checkbox>
+          <el-checkbox v-model="editSubItems[idx].isCompleted" @change="emitUpdate()">
+            <span :class="{ completed: sub.isCompleted }">{{ sub.text }}</span>
+          </el-checkbox>
         </div>
         <div class="subitem-add">
           <el-input v-model="newSubItemText" @keyup.enter="addSubItem" placeholder="新增細項..." size="small" />
@@ -65,6 +67,9 @@ import { ElMessage } from 'element-plus'
 // 若有圖片存取工具，請自行引入
 // import { saveImageToStorage, getImageFromStorage, removeImageFromStorage } from '@/utils/data'
 
+/**
+ * 細項資料結構：{ id, text, isCompleted }
+ */
 const emit = defineEmits(['close', 'update'])
 const props = defineProps({
   item: { type: Object, required: true },
