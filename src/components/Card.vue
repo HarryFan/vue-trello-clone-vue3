@@ -2,16 +2,16 @@
   <div class="card" :class="cardClasses" :data-id="item.id">
     <div class="icons">
       <span v-if="isDue" class="icon icon-due" :title="`Item is due on ${item.date}`">
-        <i class="fas fa-star"></i>
+        <font-awesome-icon icon="star" />
       </span>
       <span v-else-if="timestamp" class="icon icon-date" :title="`Item is due on ${item.date}`">
-        <i class="far fa-bell"></i>
+        <font-awesome-icon icon="bell" />
       </span>
       <span class="icon icon-edit" @click="emitEdit">
-        <i class="fas fa-edit"></i>
+        <font-awesome-icon icon="pen-to-square" />
       </span>
       <span class="icon icon-delete" @click.stop="emitDelete" title="刪除任務">
-        <i class="fas fa-trash-alt"></i>
+        <font-awesome-icon icon="trash" />
       </span>
     </div>
     <div>
@@ -37,6 +37,7 @@
 </template>
 
 <script setup>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, defineEmits, defineProps } from 'vue'
 const emit = defineEmits(['edit', 'delete', 'update'])
 const props = defineProps({

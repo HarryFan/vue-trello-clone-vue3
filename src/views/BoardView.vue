@@ -7,11 +7,13 @@
       <div v-for="(list, listIndex) in lists" :key="list.id" class="list-container">
         <div class="list-header">
           <span class="list-title">{{ list.title }}</span>
-          <el-button type="danger" size="small" @click="deleteList(list.id)" circle icon="el-icon-delete" style="float:right;" />
+          <el-button type="danger" size="small" @click="deleteList(list.id)" circle style="float:right;">
+            <font-awesome-icon icon="trash" />
+          </el-button>
         </div>
         <div class="card-list">
-          <Card v-for="item in list.items" :key="item.id" :item="item"
-            @edit="openEditForm(item, list)"
+          <Card v-for="item in list.items" :key="item.id" :item="item" :list-title="list.title"
+            @edit="openDetail(item, list)"
             @delete="deleteItem(list.id, item.id)"
             @update="updateItem(list.id, $event)"
           />
@@ -53,6 +55,7 @@ import { useBoardStore } from '@/stores/board'
 import Card from '@/components/Card.vue'
 import CardDetail from '@/components/CardDetail.vue'
 import UiItemForm from '@/components/UiItemForm.vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const board = useBoardStore()
 const lists = computed(() => board.lists)
