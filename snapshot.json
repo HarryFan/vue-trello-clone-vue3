@@ -1,0 +1,197 @@
+{
+  "structure": [
+    {
+      "type": "dir",
+      "path": "composables"
+    },
+    {
+      "type": "dir",
+      "path": "stores"
+    },
+    {
+      "type": "dir",
+      "path": "components"
+    },
+    {
+      "type": "dir",
+      "path": "views"
+    },
+    {
+      "type": "dir",
+      "path": "assets"
+    },
+    {
+      "type": "dir",
+      "path": "router"
+    },
+    {
+      "type": "file",
+      "path": "App.vue"
+    },
+    {
+      "type": "file",
+      "path": "main.js"
+    },
+    {
+      "type": "file",
+      "path": "style.css"
+    },
+    {
+      "type": "file",
+      "path": "stores/board.js"
+    },
+    {
+      "type": "file",
+      "path": "stores/index.js"
+    },
+    {
+      "type": "file",
+      "path": "components/Card.vue"
+    },
+    {
+      "type": "file",
+      "path": "components/UiItemForm.vue"
+    },
+    {
+      "type": "file",
+      "path": "components/HelloWorld.vue"
+    },
+    {
+      "type": "file",
+      "path": "components/CardDetail.vue"
+    },
+    {
+      "type": "file",
+      "path": "views/BoardView.vue"
+    },
+    {
+      "type": "file",
+      "path": "views/HomeView.vue"
+    },
+    {
+      "type": "file",
+      "path": "assets/vue.svg"
+    },
+    {
+      "type": "file",
+      "path": "router/index.js"
+    }
+  ],
+  "components": {
+    "App.vue": {
+      "props": [],
+      "emits": [],
+      "functions": []
+    },
+    "main.js": {
+      "exports": [],
+      "functions": []
+    },
+    "components/Card.vue": {
+      "props": [],
+      "emits": [
+        "edit",
+        "delete",
+        "update"
+      ],
+      "functions": [
+        "emitEdit",
+        "emitDelete",
+        "formatCreatedAt",
+        "toggleSubItem"
+      ]
+    },
+    "components/UiItemForm.vue": {
+      "props": [
+        "modelValue",
+        "default"
+      ],
+      "emits": [
+        "submit",
+        "cancel"
+      ],
+      "functions": [
+        "onSubmit",
+        "onCancel",
+        "resetForm",
+        "getImageFromStorage",
+        "removeImage",
+        "triggerFileInput",
+        "onImageUpload"
+      ]
+    },
+    "components/HelloWorld.vue": {
+      "props": [
+        "msg"
+      ],
+      "emits": [],
+      "functions": []
+    },
+    "components/CardDetail.vue": {
+      "props": [],
+      "emits": [
+        "close",
+        "update"
+      ],
+      "functions": [
+        "onCloseClick",
+        "onConfirmClick",
+        "saveTitle",
+        "resetTitle",
+        "saveDesc",
+        "resetDesc",
+        "emitUpdate",
+        "getImageFromStorage",
+        "removeImage",
+        "triggerFileInput",
+        "onImageUpload",
+        "addSubItem"
+      ]
+    },
+    "views/BoardView.vue": {
+      "props": [],
+      "emits": [],
+      "functions": [
+        "addList",
+        "deleteList",
+        "openForm",
+        "openEditForm",
+        "onFormSubmit",
+        "closeForm",
+        "addCard",
+        "deleteItem",
+        "updateItem",
+        "openDetail",
+        "closeDetail",
+        "onDetailUpdate"
+      ]
+    },
+    "views/HomeView.vue": {
+      "props": [],
+      "emits": [],
+      "functions": []
+    }
+  },
+  "stores": {
+    "stores/board.js": {
+      "state": [],
+      "actions": [
+        "persist",
+        "saveLists"
+      ]
+    },
+    "stores/index.js": {
+      "state": [],
+      "actions": [
+        "setUser"
+      ]
+    }
+  },
+  "router": {
+    "router/index.js": {
+      "routes": [
+        "/"
+      ]
+    }
+  }
+}
