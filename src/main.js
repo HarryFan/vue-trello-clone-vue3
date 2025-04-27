@@ -7,9 +7,9 @@ import App from './App.vue'
 import router from './router'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faTrash, faPenToSquare, faStar, faBell } from '@fortawesome/free-solid-svg-icons'
+import { faTrash, faPenToSquare, faStar, faBell, faRotateRight } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faTrash, faPenToSquare, faStar, faBell)
+library.add(faTrash, faPenToSquare, faStar, faBell, faRotateRight)
 
 const app = createApp(App)
 app.use(ElementPlus)

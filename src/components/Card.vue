@@ -2,16 +2,16 @@
   <div class="card" :class="cardClasses" :data-id="item.id">
     <div class="icons">
       <span v-if="isDue" class="icon icon-due" :title="`Item is due on ${item.date}`">
-        <font-awesome-icon icon="star" />
+        <font-awesome-icon :icon="['fas','star']" />
       </span>
       <span v-else-if="timestamp" class="icon icon-date" :title="`Item is due on ${item.date}`">
-        <font-awesome-icon icon="bell" />
+        <font-awesome-icon :icon="['fas','bell']" />
       </span>
-      <span class="" @click="emitEdit">
-        <font-awesome-icon icon="pen-to-square" />
+      <span class="icon icon-edit" @click="emitEdit">
+        <font-awesome-icon :icon="['fas','pen-to-square']" />
       </span>
-      <span class="" @click.stop="emitDelete" title="刪除任務">
-        <font-awesome-icon icon="trash" />
+      <span class="icon icon-delete" @click.stop="emitDelete" title="刪除任務">
+        <font-awesome-icon :icon="['fas','trash']" />
       </span>
     </div>
     <div>

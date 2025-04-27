@@ -28,6 +28,21 @@ export const useBoardStore = defineStore('board', {
     lists: loadLists() || JSON.parse(JSON.stringify(defaultLists))
   }),
   actions: {
+    // 移動整個清單
+    moveList(oldIndex, newIndex) {
+      const list = this.lists.splice(oldIndex, 1)[0]
+      this.lists.splice(newIndex, 0, list)
+      this.persist()
+    },
+    // 跨清單移動卡片
+    moveItemAcrossLists(fromListId, toListId, fromIdx, toIdx) {
+      const fromList = this.lists.find(l => l.id === fromListId)
+      const toList = this.lists.find(l => l.id === toListId)
+      if (!fromList || !toList) return
+      const item = fromList.items.splice(fromIdx, 1)[0]
+      toList.items.splice(toIdx, 0, item)
+      this.persist()
+    },
     persist() {
       saveLists(this.lists)
     },
