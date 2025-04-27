@@ -2,10 +2,6 @@
   "structure": [
     {
       "type": "dir",
-      "path": "composables"
-    },
-    {
-      "type": "dir",
       "path": "stores"
     },
     {
@@ -163,7 +159,8 @@
         "updateItem",
         "openDetail",
         "closeDetail",
-        "onDetailUpdate"
+        "onDetailUpdate",
+        "resetLists"
       ]
     },
     "views/HomeView.vue": {
@@ -190,7 +187,8 @@
   "router": {
     "router/index.js": {
       "routes": [
-        "/"
+        "/",
+        "/welcome"
       ]
     }
   }

@@ -33,10 +33,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
-// 若有圖片存取工具，請自行引入
-// import { saveImageToStorage, getImageFromStorage, removeImageFromStorage } from '@/utils/data'
+import { nextTick, reactive, ref, watch } from 'vue'
 
 const emit = defineEmits(['submit', 'cancel'])
 const props = defineProps({

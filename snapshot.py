@@ -19,6 +19,19 @@ def list_files(base):
             })
     return tree
 
+def extract_jsdoc(content, func_name):
+    """
+    從 JS/Vue 檔案內容中，根據函式名稱擷取 JSDoc 註解
+    @param content: 檔案全文字串
+    @param func_name: 函式名稱
+    @return: JSDoc 註解字串，若無則為空字串
+    """
+    # 支援 /** ... */ 或 // ... 單行註解
+    # 只抓緊鄰在 function 前的註解
+    pattern = re.compile(r"(/\*\*.*?\*/|//.*?\n)\s*function\s+" + re.escape(func_name) + r"\\(", re.DOTALL)
+    match = pattern.search(content)
+    return match.group(1).strip() if match else ""
+
 def extract_vue_info(filepath):
     info = {"props": [], "emits": [], "functions": []}
     with open(filepath, encoding="utf-8") as f:
@@ -39,7 +52,11 @@ def extract_vue_info(filepath):
             info["emits"].extend(emits)
     # functions (script setup)
     func_matches = re.findall(r"function\s+(\w+)\(", content)
-    info["functions"].extend(func_matches)
+    # 補抓 JSDoc
+    info["functions"] = []
+    for func in func_matches:
+        jsdoc = extract_jsdoc(content, func)
+        info["functions"].append({"name": func, "jsdoc": jsdoc})
     return info
 
 def extract_js_info(filepath):
@@ -48,10 +65,13 @@ def extract_js_info(filepath):
         content = f.read()
     # export functions
     export_matches = re.findall(r"export function (\w+)\(", content)
-    info["exports"].extend(export_matches)
     # normal functions
     func_matches = re.findall(r"function (\w+)\(", content)
-    info["functions"].extend(func_matches)
+    info["exports"].extend(export_matches)
+    info["functions"] = []
+    for func in func_matches:
+        jsdoc = extract_jsdoc(content, func)
+        info["functions"].append({"name": func, "jsdoc": jsdoc})
     return info
 
 def extract_pinia_info(filepath):

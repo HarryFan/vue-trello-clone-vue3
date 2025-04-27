@@ -50,6 +50,16 @@ npm run dev
 
 ## 參考資源
 - [Element Plus 官方元件與圖示總覽](https://element-plus.org/en-US/component/overview.html)
+- [Font Awesome 官方圖示查詢](https://fontawesome.com/icons/)
+- [vue3-dnd 拖曳元件官方文件](https://www.vue3-dnd.com/guide/)
+
+---
+
+## 當前困難與待解決
+- 無法在 Vue3 + Vite 中正確 import `vuedraggable`，持續出現 `plugin:vite:import-analysis` 錯誤
+- 已嘗試指定 dist 路徑、調整 `vite.config.js`、安裝 commonjs 插件、改用其他拖曳套件，仍未解決
+- 明日回來接續時，可參考 Vue2 版本之實作邏輯：
+  `/Users/gangshuanfan/Documents/github/vue-trello-clone`
 
 ---
 

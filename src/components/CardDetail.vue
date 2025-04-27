@@ -62,23 +62,18 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
-// 若有圖片存取工具，請自行引入
-// import { saveImageToStorage, getImageFromStorage, removeImageFromStorage } from '@/utils/data'
+import { ref, watch } from 'vue'
 
-/**
- * 細項資料結構：{ id, text, isCompleted }
- */
 const emit = defineEmits(['close', 'update'])
 const props = defineProps({
   item: { type: Object, required: true },
   listTitle: { type: String, default: '' },
   modelValue: { type: Boolean, default: false },
 })
+
 const visible = ref(props.modelValue)
 watch(() => props.modelValue, v => (visible.value = v))
-watch(visible, v => emit('update:modelValue', v))
 
 const editTitle = ref(props.item.title)
 const editDesc = ref(props.item.description || '')
@@ -95,12 +90,11 @@ watch(() => props.item, (val) => {
 }, { immediate: true })
 
 function onCloseClick() {
-  emit('close')
   visible.value = false
+  emit('close')
 }
 function onConfirmClick() {
   emitUpdate()
-  emit('close')
   visible.value = false
 }
 function saveTitle() {

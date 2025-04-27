@@ -7,10 +7,10 @@
       <span v-else-if="timestamp" class="icon icon-date" :title="`Item is due on ${item.date}`">
         <font-awesome-icon icon="bell" />
       </span>
-      <span class="icon icon-edit" @click="emitEdit">
+      <span class="" @click="emitEdit">
         <font-awesome-icon icon="pen-to-square" />
       </span>
-      <span class="icon icon-delete" @click.stop="emitDelete" title="刪除任務">
+      <span class="" @click.stop="emitDelete" title="刪除任務">
         <font-awesome-icon icon="trash" />
       </span>
     </div>
