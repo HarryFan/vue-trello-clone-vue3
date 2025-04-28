@@ -1,68 +1,62 @@
 <template>
-  <el-dialog v-model="visible" width="520px" :show-close="false" @close="onCloseClick">
-    <template #header>
+  <div v-if="visible" class="modal-overlay">
+    <div class="modal-content">
       <div class="card-detail__header">
-        <el-input v-model="editTitle" class="card-detail__title" @blur="saveTitle" @keyup.enter="saveTitle" @keyup.esc="resetTitle" />
-        <el-button class="close-btn" @click="onCloseClick" circle icon="el-icon-close" />
+        <input v-model="editTitle" class="card-detail__title" @blur="saveTitle" @keyup.enter="saveTitle" @keyup.esc="resetTitle" />
+        <button class="close-btn" @click="onCloseClick">關閉</button>
         <div class="card-detail__meta">
           <span class="card-detail__list">{{ listTitle }}</span>
           <span v-if="item.date" class="card-detail__date"><i class="far fa-calendar-alt"></i> {{ item.date }}</span>
         </div>
       </div>
-    </template>
-    <div class="card-detail__section">
-      <label class="card-detail__label">描述</label>
-      <el-input
-        v-model="editDesc"
-        type="textarea"
-        :autosize="{ minRows: 3, maxRows: 6 }"
-        class="card-detail__desc"
-        @blur="saveDesc"
-        @keyup.enter="saveDesc"
-        @keyup.esc="resetDesc"
-      />
-    </div>
-    <!-- 圖片上傳/預覽區塊 -->
-    <div class="card-detail__section">
-      <label class="card-detail__label">圖片</label>
-      <div class="images">
-        <div v-for="imgId in editImages" :key="imgId" class="image-preview">
-          <img :src="getImageFromStorage(imgId)" alt="Task image" />
-          <el-button class="delete is-small" @click="removeImage(imgId)" circle icon="el-icon-delete" />
-        </div>
-        <div class="image-upload">
-          <input type="file" ref="fileInput" accept="image/*" @change="onImageUpload" style="display:none" />
-          <el-button type="info" plain @click="triggerFileInput">
-            <i class="fas fa-upload"></i>
-            <span>上傳圖片</span>
-          </el-button>
+      <div class="card-detail__section">
+        <label class="card-detail__label">描述</label>
+        <textarea
+          v-model="editDesc"
+          class="card-detail__desc"
+          @blur="saveDesc"
+          @keyup.enter="saveDesc"
+          @keyup.esc="resetDesc"
+        />
+      </div>
+      <!-- 圖片上傳/預覽區塊 -->
+      <div class="card-detail__section">
+        <label class="card-detail__label">圖片</label>
+        <div class="images">
+          <div v-for="imgId in editImages" :key="imgId" class="image-preview">
+            <img :src="getImageFromStorage(imgId)" alt="Task image" />
+            <button class="delete is-small" @click="removeImage(imgId)">刪除</button>
+          </div>
+          <div class="image-upload">
+            <input type="file" ref="fileInput" accept="image/*" @change="onImageUpload" style="display:none" />
+            <button type="info" plain @click="triggerFileInput">
+              <i class="fas fa-upload"></i>
+              <span>上傳圖片</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-    <!-- 細項清單區塊 -->
-    <div class="card-detail__section">
-      <label class="card-detail__label">細項</label>
-      <div class="subitems">
-        <div v-for="(sub, idx) in editSubItems" :key="sub.id" class="subitem-row">
-          <el-checkbox v-model="editSubItems[idx].isCompleted" @change="emitUpdate()">
+      <!-- 細項清單區塊 -->
+      <div class="card-detail__section">
+        <label class="card-detail__label">細項</label>
+        <div class="subitems">
+          <div v-for="(sub, idx) in editSubItems" :key="sub.id" class="subitem-row">
+            <input type="checkbox" v-model="editSubItems[idx].isCompleted" @change="emitUpdate()">
             <span :class="{ completed: sub.isCompleted }">{{ sub.text }}</span>
-          </el-checkbox>
-        </div>
-        <div class="subitem-add">
-          <el-input v-model="newSubItemText" @keyup.enter="addSubItem" placeholder="新增細項..." size="small" />
-          <el-button type="primary" size="small" @click="addSubItem" :disabled="!newSubItemText.trim()">新增</el-button>
+          </div>
+          <div class="subitem-add">
+            <input v-model="newSubItemText" @keyup.enter="addSubItem" placeholder="新增細項..." size="small" />
+            <button type="primary" size="small" @click="addSubItem" :disabled="!newSubItemText.trim()">新增</button>
+          </div>
         </div>
       </div>
+      <button @click="onCloseClick">取消</button>
+      <button type="primary" @click="onConfirmClick">確認</button>
     </div>
-    <template #footer>
-      <el-button @click="onCloseClick">取消</el-button>
-      <el-button type="primary" @click="onConfirmClick">確認</el-button>
-    </template>
-  </el-dialog>
+  </div>
 </template>
 
 <script setup>
-import { ElMessage } from 'element-plus'
 import { ref, watch } from 'vue'
 
 const emit = defineEmits(['close', 'update'])
@@ -136,7 +130,7 @@ function onImageUpload(e) {
   const file = e.target.files[0]
   if (!file) return
   if (file.size > 1024 * 1024) {
-    ElMessage.error('圖片大小不能超過 1MB')
+    alert('圖片大小不能超過 1MB')
     return
   }
   const reader = new FileReader()
@@ -249,5 +243,36 @@ function addSubItem() {
   display: flex;
   gap: 6px;
   margin-top: 6px;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  min-width: 320px;
+  min-height: 120px;
+  box-shadow: 0 4px 16px #1976d233;
+  position: relative;
+}
+button.close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #e53935;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  cursor: pointer;
 }
 </style>

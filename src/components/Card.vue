@@ -38,7 +38,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, defineEmits, defineProps } from 'vue'
+import { computed } from 'vue'
 const emit = defineEmits(['edit', 'delete', 'update'])
 const props = defineProps({
   item: {

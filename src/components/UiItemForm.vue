@@ -1,44 +1,41 @@
 <template>
-  <el-form :model="form" ref="formRef" label-width="60px" @submit.prevent>
-    <el-form-item label="標題" prop="title" :rules="[{ required: true, message: '請輸入標題', trigger: 'blur' }]">
-      <el-input v-model="form.title" placeholder="請輸入標題" @keyup.enter="onSubmit" />
-    </el-form-item>
-    <el-form-item label="描述">
-      <el-input v-model="form.description" type="textarea" :autosize="{ minRows: 2, maxRows: 4 }" placeholder="請輸入描述" />
-    </el-form-item>
-    <el-form-item label="日期">
-      <el-date-picker v-model="form.date" type="date" placeholder="選擇日期" style="width:100%" />
-    </el-form-item>
-    <!-- 圖片上傳/預覽區塊 -->
-    <el-form-item label="圖片">
+  <form @submit.prevent="onSubmit" class="ui-form">
+    <div class="form-group">
+      <label>標題</label>
+      <input v-model="form.title" placeholder="請輸入標題" required />
+    </div>
+    <div class="form-group">
+      <label>描述</label>
+      <textarea v-model="form.description" placeholder="請輸入描述"></textarea>
+    </div>
+    <div class="form-group">
+      <label>日期</label>
+      <input type="date" v-model="form.date" />
+    </div>
+    <div class="form-group">
+      <label>圖片</label>
+      <input type="file" @change="onImageUpload" accept="image/*" />
       <div class="images">
-        <div v-for="imgId in form.images" :key="imgId" class="image-preview">
-          <img :src="getImageFromStorage(imgId)" alt="Task image" />
-          <el-button class="delete is-small" @click="removeImage(imgId)" circle icon="el-icon-delete" />
-        </div>
-        <div class="image-upload">
-          <input type="file" ref="fileInput" accept="image/*" @change="onImageUpload" style="display:none" />
-          <el-button type="info" plain @click="triggerFileInput">
-            <i class="fas fa-upload"></i>
-            <span>上傳圖片</span>
-          </el-button>
+        <div v-for="(img, idx) in form.images" :key="idx" class="image-preview">
+          <img :src="img" />
+          <button type="button" class="delete" @click="removeImage(img)">x</button>
         </div>
       </div>
-    </el-form-item>
-    <el-form-item>
-      <el-button type="primary" @click="onSubmit">{{ form.id ? '更新' : '新增' }}</el-button>
-      <el-button @click="onCancel">取消</el-button>
-    </el-form-item>
-  </el-form>
+    </div>
+    <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
+    <div class="form-actions">
+      <button type="submit" class="primary">{{ form.id ? '更新' : '新增' }}</button>
+      <button type="button" @click="onCancel">取消</button>
+    </div>
+  </form>
 </template>
 
 <script setup>
-import { ElMessage } from 'element-plus'
 import { nextTick, reactive, ref, watch } from 'vue'
 
 const emit = defineEmits(['submit', 'cancel'])
 const props = defineProps({
-  modelValue: { type: Object, default: () => ({}) }
+  modelValue: Object
 })
 const formRef = ref(null)
 const form = reactive({
@@ -53,55 +50,50 @@ watch(() => props.modelValue, (val) => {
 }, { immediate: true })
 
 function onSubmit() {
-  formRef.value.validate((valid) => {
-    if (valid) {
-      emit('submit', { ...form })
-      resetForm()
-    } else {
-      ElMessage.error('請填寫所有必填欄位！')
-    }
-  })
-}
-function onCancel() {
-  emit('cancel', { ...form })
+  if (!form.title.trim()) {
+    errorMsg.value = '請填寫標題！'
+    return
+  }
+  emit('submit', { ...form })
   resetForm()
 }
+function onCancel() { emit('cancel') }
 function resetForm() {
   Object.assign(form, { id: null, title: '', description: '', date: null, images: [] })
-  nextTick(() => formRef.value?.clearValidate())
+  errorMsg.value = ''
+  nextTick(() => formRef.value?.clearValidate?.())
 }
-function getImageFromStorage(imgId) {
-  // TODO: 實際專案請實作圖片讀取
-  return ''
-}
-function removeImage(imgId) {
-  // TODO: 實際專案請實作圖片刪除
-  form.images = form.images.filter(id => id !== imgId)
-}
-function triggerFileInput() {
-  document.querySelector('input[type=file][ref=fileInput]')?.click()
-}
+const errorMsg = ref('')
 function onImageUpload(e) {
   const file = e.target.files[0]
   if (!file) return
   if (file.size > 1024 * 1024) {
-    ElMessage.error('圖片大小不能超過 1MB')
+    errorMsg.value = '圖片大小不能超過 1MB'
     return
   }
   const reader = new FileReader()
   reader.onload = (evt) => {
     const base64 = evt.target.result
-    // TODO: 請根據專案需求存儲圖片並獲取 imgId
-    // const imgId = saveImageToStorage(base64)
-    // if (imgId) {
-    //   form.images.push(imgId)
-    // }
+    form.images.push(base64)
   }
   reader.readAsDataURL(file)
+}
+function removeImage(imgId) {
+  form.images = form.images.filter(id => id !== imgId)
 }
 </script>
 
 <style scoped>
+.ui-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 .images {
   display: flex;
   flex-wrap: wrap;
@@ -124,9 +116,30 @@ function onImageUpload(e) {
   top: 3px;
   right: 3px;
   z-index: 2;
+  background: #e53935;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  font-size: 13px;
 }
-.image-upload {
+.form-actions {
   display: flex;
-  align-items: center;
+  gap: 10px;
+}
+.error-msg {
+  color: #e53935;
+  font-size: 13px;
+  margin-top: 4px;
+}
+button.primary {
+  background-color: #2196f3;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
 }
 </style>
