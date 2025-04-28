@@ -107,6 +107,11 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
 </script>
 
 <style lang="scss" scoped>
+.list-header{
+  display: flex;justify-content: space-between;
+  ;
+
+}
 .board-view {
   max-width: 1200px;
   margin: 0 auto;
@@ -114,9 +119,11 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
   min-height: 100vh;
   box-sizing: border-box;
   background: #f5f8fb;
+  position: relative;
 }
 
 .board-header {
+  position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -134,7 +141,10 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
     font-weight: 600;
   }
   button.warning {
-    margin-left: 12px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 0;
     flex-shrink: 0;
   }
 }
@@ -149,57 +159,50 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
 }
 
 .lists-wrapper {
-  display: flex;
-  flex-direction: row;
-  gap: 32px;
-  align-items: flex-start;
-  flex-wrap: nowrap;
+  white-space: nowrap;
   overflow-x: auto;
   width: 100%;
   box-sizing: border-box;
-  justify-content: flex-start;
+  padding-bottom: 8px;
 }
 
-.list-column {
+.list-column, .new-list-column {
+  display: inline-block;
+  vertical-align: top;
+  width: 320px;
+  min-width: 220px;
+  max-width: 100vw;
+  margin: 5px 20px 5px 0;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px #1976d21a, 0 1.5px 4px #b6d4ff33;
-  width: 320px;
-  min-width: 260px;
-  margin-bottom: 12px;
   padding: 18px 14px 12px 14px;
   transition: box-shadow 0.2s, transform 0.2s;
   border: 1.5px solid #e3f0fd;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   align-self: flex-start;
   @media (max-width: 800px) {
+    display: block;
     width: 100%;
     min-width: 0;
-    margin-bottom: 10px;
-    flex-shrink: 1;
+    margin: 12px 0 18px 0;
+    border-radius: 12px;
+    box-shadow: 0 1.5px 8px rgba(33,150,243,0.10);
+    padding: 10px 6px 16px 6px;
   }
 }
 
 .new-list-column {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  min-width: 180px;
-  max-width: 220px;
-  padding: 24px 10px 18px 10px;
-  margin-bottom: 12px;
   background: #f9fbfd;
   border: 2px dashed #90caf9;
-  border-radius: 12px;
   opacity: 0.92;
   box-shadow: 0 1.5px 6px #90caf933;
-  transition: background 0.2s, border-color 0.2s;
-  align-self: flex-start;
-  flex-shrink: 0;
+  .new-list-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    align-items: center;
+  }
 }
 
 .cards-container {
@@ -212,6 +215,26 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
   display: flex;
   flex-direction: row;
   gap: 8px;
+}
+
+@media (max-width: 800px) {
+  .lists-wrapper {
+    white-space: normal;
+    padding-bottom: 0;
+  }
+  .list-column, .new-list-column {
+    display: block;
+    width: 100%;
+    margin: 12px 0 18px 0;
+  }
+  .board-header {
+    flex-direction: column;
+    align-items: flex-start;
+    button.warning {
+      position: static;
+      margin-top: 8px;
+    }
+  }
 }
 
 input, textarea {
