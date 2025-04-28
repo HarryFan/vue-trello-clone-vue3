@@ -1,11 +1,11 @@
 <template>
   <div class="card" :class="cardClasses" :data-id="item.id">
     <div class="icons">
-      <span v-if="isDue" class="icon icon-due tooltip" :title="`此任務將於 ${item.date} 到期，剩餘 ${getHoursLeft()} 小時，請盡快處理！`">
+      <span v-if="isDue" class="icon icon-due tooltip" :title="`此任務將於 ${item.deadline} 到期，剩餘 ${getHoursLeft()} 小時，請盡快處理！`">
         <font-awesome-icon :icon="['fas','star']" />
         <span class="tooltip-text">任務即將到期，剩餘 {{ getHoursLeft() }} 小時</span>
       </span>
-      <span v-else-if="timestamp" class="icon icon-date tooltip" :title="`此任務已設定截止日期（${item.date}），目前距離到期超過 3 天`">
+      <span v-else-if="timestamp" class="icon icon-date tooltip" :title="`此任務已設定截止日期（${item.deadline}），目前距離到期超過 3 天`">
         <font-awesome-icon :icon="['fas','bell']" />
         <span class="tooltip-text">已設定截止日期，尚未進入提醒區間</span>
       </span>
@@ -31,9 +31,9 @@
           <span :class="{ 'completed': sub.isCompleted }">{{ sub.text }}</span>
         </div>
       </div>
-      <p class="item-timestamp" v-if="item.date">
+      <p class="item-timestamp" v-if="item.deadline">
         <span class="timestamp-label">任務截止日期：</span>
-        <span class="timestamp-value">{{ item.date }}</span>
+        <span class="timestamp-value">{{ item.deadline }}</span>
       </p>
       <p class="item-timestamp" v-else-if="item.createdAt">
         <span class="timestamp-label">建立：</span>
@@ -94,7 +94,7 @@ const cardClasses = computed(() => ({
  * 取得日期 timestamp
  * @returns {number}
  */
-const timestamp = computed(() => Number(new Date(props.item.date)))
+const timestamp = computed(() => Number(new Date(props.item.deadline)))
 
 /**
  * 是否逾期
@@ -118,8 +118,8 @@ const isDue = computed(() => {
  * @returns {number|null}
  */
 function getHoursLeft() {
-  if (!props.item.date) return null
-  const deadline = new Date(props.item.date).getTime()
+  if (!props.item.deadline) return null
+  const deadline = new Date(props.item.deadline).getTime()
   const now = Date.now()
   const diff = deadline - now
   if (diff <= 0) return 0

@@ -6,7 +6,7 @@
         <button class="close-btn" @click="onCloseClick">關閉</button>
         <div class="card-detail__meta">
           <span class="card-detail__list">{{ listTitle }}</span>
-          <span v-if="item.date" class="card-detail__date"><i class="far fa-calendar-alt"></i> {{ item.date }}</span>
+          <span v-if="item.deadline" class="card-detail__date"><i class="far fa-calendar-alt"></i> {{ item.deadline }}</span>
         </div>
       </div>
       <div class="card-detail__section">
