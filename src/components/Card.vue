@@ -48,28 +48,68 @@
 </template>
 
 <script setup>
+/**
+ * 卡片組件 Card.vue
+ * 顯示單一任務卡片內容，包含標題、描述、細項、圖片、日期與操作 icon。
+ * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。
+ * - 支援編輯、刪除、細項切換等互動。
+ * @module Card
+ * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、圖片、細項等。
+ * @prop {String} listTitle - 所屬清單名稱。
+ * @event edit - 點擊編輯 icon 時發出，傳遞 item。
+ * @event delete - 點擊刪除 icon 時發出，傳遞 item。
+ * @event update - 細項勾選時發出，傳遞更新後的 item。
+ */
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed } from 'vue'
 const emit = defineEmits(['edit', 'delete', 'update'])
 const props = defineProps({
+  /**
+   * 任務卡片資料物件
+   * @type {Object}
+   */
   item: {
     type: Object,
     required: true
   },
+  /**
+   * 所屬清單名稱
+   * @type {String}
+   */
   listTitle: {
     type: String,
     required: true
   }
 })
 
+/**
+ * 卡片狀態 class 計算屬性
+ * - is-due: 即將到期
+ * - is-overdue: 已逾期
+ * - completed-card: 已完成
+ */
 const cardClasses = computed(() => ({
   'is-due': isDue.value,
   'is-overdue': isOverdue.value,
   'completed-card': props.listTitle === '完成'
 }))
 
+/**
+ * 取得日期 timestamp
+ * @returns {number}
+ */
 const timestamp = computed(() => Number(new Date(props.item.date)))
+
+/**
+ * 是否逾期
+ * @returns {boolean}
+ */
 const isOverdue = computed(() => timestamp.value && timestamp.value < Date.now())
+
+/**
+ * 是否進入即將到期區間（3天內）
+ * @returns {boolean}
+ */
 const isDue = computed(() => {
   const date = timestamp.value
   const due = date - (1000 * 60 * 60 * 24) * 3
@@ -77,12 +117,25 @@ const isDue = computed(() => {
   return date > now && now > due
 })
 
+/**
+ * 發送編輯事件
+ * @fires edit
+ */
 function emitEdit() {
   emit('edit', props.item)
 }
+/**
+ * 發送刪除事件
+ * @fires delete
+ */
 function emitDelete() {
   emit('delete', props.item)
 }
+/**
+ * 格式化日期顯示（yyyy/MM/dd HH:mm）
+ * @param {string|Date} createdAt - 時間字串或物件
+ * @returns {string}
+ */
 function formatCreatedAt(createdAt) {
   if (!createdAt) return ''
   const d = new Date(createdAt)
@@ -93,6 +146,11 @@ function formatCreatedAt(createdAt) {
   const min = d.getMinutes().toString().padStart(2, '0')
   return `${yyyy}/${mm}/${dd} ${hh}:${min}`
 }
+/**
+ * 細項勾選切換，發送 update 事件
+ * @param {number} idx - 細項索引
+ * @fires update
+ */
 function toggleSubItem(idx) {
   const newSubItems = props.item.subItems.map((s, i) =>
     i === idx ? { ...s, isCompleted: !s.isCompleted } : s

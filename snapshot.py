@@ -28,7 +28,7 @@ def extract_jsdoc(content, func_name):
     """
     # 支援 /** ... */ 或 // ... 單行註解
     # 只抓緊鄰在 function 前的註解
-    pattern = re.compile(r"(/\*\*.*?\*/|//.*?\n)\s*function\s+" + re.escape(func_name) + r"\\(", re.DOTALL)
+    pattern = re.compile(r"(/\*\*.*?\*/|//.*?\n)\s*function\s+" + re.escape(func_name) + r"\(", re.DOTALL)
     match = pattern.search(content)
     return match.group(1).strip() if match else ""
 
