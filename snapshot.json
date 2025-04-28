@@ -40,13 +40,13 @@
       "functions": [
         {
           "name": "loadLists",
-          "jsdoc": "// 預設三清單結構\nexport const defaultLists = [\n  { id: 1, title: '待辦', items: [ { id: 11, title: '範例任務1', description: '說明...', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' } ] },\n  { id: 2, title: '進行中', items: [ { id: 21, title: '範例任務2', description: '', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' } ] },\n  { id: 3, title: '完成', items: [] }\n]",
+          "jsdoc": "/**\n * Trello-like看板的核心資料儲存與操作邏輯\n * 使用Pinia管理看板的清單和卡片資料\n */\nimport { defineStore } from 'pinia'\n\n/** 本地儲存的鍵名，用於保存看板資料 */\nconst STORAGE_KEY = 'trello_lists_v3'\n\n/**\n * 預設看板結構，包含三個清單：待辦、進行中、完成\n * 每個清單包含範例卡片，展示資料結構\n */\nexport const defaultLists = [\n  { id: 1, title: '待辦', items: [{ id: 11, title: '範例任務1', description: '說明...', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' }] },\n  { id: 2, title: '進行中', items: [{ id: 21, title: '範例任務2', description: '', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' }] },\n  { id: 3, title: '完成', items: [] }\n]\n\n/**\n * 從localStorage讀取保存的看板資料\n * @returns {Array|null} 成功返回看板資料陣列，失敗返回null\n */",
           "inputs": [],
           "output": null
         },
         {
           "name": "saveLists",
-          "jsdoc": "// 預設三清單結構\nexport const defaultLists = [\n  { id: 1, title: '待辦', items: [ { id: 11, title: '範例任務1', description: '說明...', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' } ] },\n  { id: 2, title: '進行中', items: [ { id: 21, title: '範例任務2', description: '', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' } ] },\n  { id: 3, title: '完成', items: [] }\n]\n\nfunction loadLists() {\n  try {\n    const data = localStorage.getItem(STORAGE_KEY)\n    return data ? JSON.parse(data) : null\n  } catch (e) {\n    return null\n  }\n}",
+          "jsdoc": "/**\n * Trello-like看板的核心資料儲存與操作邏輯\n * 使用Pinia管理看板的清單和卡片資料\n */\nimport { defineStore } from 'pinia'\n\n/** 本地儲存的鍵名，用於保存看板資料 */\nconst STORAGE_KEY = 'trello_lists_v3'\n\n/**\n * 預設看板結構，包含三個清單：待辦、進行中、完成\n * 每個清單包含範例卡片，展示資料結構\n */\nexport const defaultLists = [\n  { id: 1, title: '待辦', items: [{ id: 11, title: '範例任務1', description: '說明...', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' }] },\n  { id: 2, title: '進行中', items: [{ id: 21, title: '範例任務2', description: '', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' }] },\n  { id: 3, title: '完成', items: [] }\n]\n\n/**\n * 從localStorage讀取保存的看板資料\n * @returns {Array|null} 成功返回看板資料陣列，失敗返回null\n */\nfunction loadLists() {\n  try {\n    const data = localStorage.getItem(STORAGE_KEY)\n    return data ? JSON.parse(data) : null\n  } catch (e) {\n    return null\n  }\n}\n\n/**\n * 將看板資料保存到localStorage\n * @param {Array} lists - 要保存的看板資料\n */",
           "inputs": [],
           "output": null
         }
@@ -610,12 +610,7 @@
   "stores": {
     "stores/board.js": {
       "state": [],
-      "actions": [
-        "moveList",
-        "splice",
-        "splice",
-        "persist"
-      ]
+      "actions": []
     },
     "stores/index.js": {
       "state": [],
