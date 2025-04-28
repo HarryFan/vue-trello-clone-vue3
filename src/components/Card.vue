@@ -198,8 +198,8 @@ function toggleSubItem(idx) {
 }
 .icons {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 12px;
+  right: 12px;
   display: flex;
   align-items: center;
   gap: 0.5em;
@@ -259,7 +259,9 @@ function toggleSubItem(idx) {
 }
 .tooltip {
   position: relative;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .tooltip .tooltip-text {
   visibility: hidden;
@@ -271,14 +273,15 @@ function toggleSubItem(idx) {
   padding: 3px 8px;
   position: absolute;
   z-index: 10;
-  bottom: 120%;
+  bottom: 125%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-2px);
   opacity: 0;
   transition: opacity 0.18s;
   font-size: 0.83em;
   pointer-events: none;
   white-space: nowrap;
+  box-shadow: 0 2px 8px #0002;
 }
 .tooltip:hover .tooltip-text {
   visibility: visible;
