@@ -74,7 +74,7 @@ npm run dev
 ## 聯絡方式
 
 - Email: harry750110@gmail.com
-- LinkedIn: [綱榕 范](https://www.linkedin.com/in/%E7%B6%B1%E6%A0%93-%E8%8C%83-810868219/)
+- LinkedIn: [范綱栓](https://www.linkedin.com/in/%E7%B6%B1%E6%A0%93-%E8%8C%83-810868219/)
 
 ---
 
