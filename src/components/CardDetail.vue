@@ -57,6 +57,16 @@
 </template>
 
 <script setup>
+/**
+ * 卡片詳細資訊組件 CardDetail.vue
+ * 顯示卡片完整內容、圖片、細項、編輯與更新功能。
+ * @module CardDetail
+ * @prop {Object} item - 任務資料物件。
+ * @prop {String} listTitle - 清單標題。
+ * @prop {Boolean} modelValue - 詳細視窗顯示狀態。
+ * @event update - 編輯後發出，傳遞更新資料。
+ * @event close - 關閉視窗時發出。
+ */
 import { ref, watch } from 'vue'
 
 const emit = defineEmits(['close', 'update'])

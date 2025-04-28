@@ -19,6 +19,55 @@ def list_files(base):
             })
     return tree
 
+def parse_jsdoc(jsdoc):
+    import re
+    inputs = []
+    output = None
+    if not jsdoc:
+        return inputs, output
+    param_matches = re.findall(r'@param\\s+{([^}]+)}\\s+(\\w+)(?:\\s*-\\s*([^\\n]+))?', jsdoc)
+    for typ, name, desc in param_matches:
+        inputs.append({'name': name, 'type': typ, 'desc': desc or ''})
+    ret_match = re.search(r'@returns?\\s+{([^}]+)}\\s*([^\\n]*)', jsdoc)
+    if ret_match:
+        output = {'type': ret_match.group(1), 'desc': ret_match.group(2).strip()}
+    return inputs, output
+
+def list_files_with_info(base):
+    tree = []
+    for root, dirs, files in os.walk(base):
+        for d in dirs:
+            tree.append({
+                "type": "dir",
+                "path": os.path.relpath(os.path.join(root, d), base)
+            })
+        for f in files:
+            rel_path = os.path.relpath(os.path.join(root, f), base)
+            entry = {
+                "type": "file",
+                "path": rel_path
+            }
+            abs_path = os.path.join(base, rel_path)
+            if f.endswith('.vue'):
+                info = extract_vue_info(abs_path)
+                # 補上 functions 的 jsdoc input/output
+                for func in info.get("functions", []):
+                    jsdoc = func.get("jsdoc", "")
+                    inputs, output = parse_jsdoc(jsdoc)
+                    func["inputs"] = inputs
+                    func["output"] = output
+                entry["functions"] = info.get("functions", [])
+            elif f.endswith('.js'):
+                info = extract_js_info(abs_path)
+                for func in info.get("functions", []):
+                    jsdoc = func.get("jsdoc", "")
+                    inputs, output = parse_jsdoc(jsdoc)
+                    func["inputs"] = inputs
+                    func["output"] = output
+                entry["functions"] = info.get("functions", [])
+            tree.append(entry)
+    return tree
+
 def extract_jsdoc(content, func_name):
     """
     從 JS/Vue 檔案內容中，根據函式名稱擷取 JSDoc 註解
@@ -92,7 +141,7 @@ def extract_pinia_info(filepath):
 
 def main():
     snapshot = {"structure": [], "components": {}, "stores": {}, "router": {}}
-    files = list_files(SRC_DIR)
+    files = list_files_with_info(SRC_DIR)
     snapshot["structure"] = files
 
     for entry in files:

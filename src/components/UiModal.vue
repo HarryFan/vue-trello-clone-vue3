@@ -7,6 +7,14 @@
   </div>
 </template>
 <script setup>
+/**
+ * 通用彈窗組件 UiModal.vue
+ * 支援 slot 彈窗內容、動畫與遮罩。
+ * @module UiModal
+ * @prop {Boolean} modelValue - 彈窗顯示狀態。
+ * @event update:modelValue - 彈窗開關時發出。
+ * @event cancel - 彈窗關閉時發出。
+ */
 const emit = defineEmits(['update:modelValue', 'cancel'])
 const props = defineProps({
   modelValue: Boolean

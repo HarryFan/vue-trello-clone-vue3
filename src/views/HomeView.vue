@@ -6,6 +6,11 @@
 </template>
 
 <script setup>
+/**
+ * 首頁視圖 HomeView.vue
+ * 提供應用入口與簡介。
+ * @module HomeView
+ */
 </script>
 
 <style scoped>

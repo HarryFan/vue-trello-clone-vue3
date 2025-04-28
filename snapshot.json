@@ -22,11 +22,13 @@
     },
     {
       "type": "file",
-      "path": "App.vue"
+      "path": "App.vue",
+      "functions": []
     },
     {
       "type": "file",
-      "path": "main.js"
+      "path": "main.js",
+      "functions": []
     },
     {
       "type": "file",
@@ -34,39 +36,312 @@
     },
     {
       "type": "file",
-      "path": "stores/board.js"
+      "path": "stores/board.js",
+      "functions": [
+        {
+          "name": "loadLists",
+          "jsdoc": "// 預設三清單結構\nexport const defaultLists = [\n  { id: 1, title: '待辦', items: [ { id: 11, title: '範例任務1', description: '說明...', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' } ] },\n  { id: 2, title: '進行中', items: [ { id: 21, title: '範例任務2', description: '', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' } ] },\n  { id: 3, title: '完成', items: [] }\n]",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "saveLists",
+          "jsdoc": "// 預設三清單結構\nexport const defaultLists = [\n  { id: 1, title: '待辦', items: [ { id: 11, title: '範例任務1', description: '說明...', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' } ] },\n  { id: 2, title: '進行中', items: [ { id: 21, title: '範例任務2', description: '', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' } ] },\n  { id: 3, title: '完成', items: [] }\n]\n\nfunction loadLists() {\n  try {\n    const data = localStorage.getItem(STORAGE_KEY)\n    return data ? JSON.parse(data) : null\n  } catch (e) {\n    return null\n  }\n}",
+          "inputs": [],
+          "output": null
+        }
+      ]
     },
     {
       "type": "file",
-      "path": "stores/index.js"
+      "path": "stores/index.js",
+      "functions": []
     },
     {
       "type": "file",
-      "path": "components/Card.vue"
+      "path": "components/Card.vue",
+      "functions": [
+        {
+          "name": "emitEdit",
+          "jsdoc": "/**\n * 卡片組件 Card.vue\n * 顯示單一任務卡片內容，包含標題、描述、細項、圖片、日期與操作 icon。\n * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。\n * - 支援編輯、刪除、細項切換等互動。\n * @module Card\n * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、圖片、細項等。\n * @prop {String} listTitle - 所屬清單名稱。\n * @event edit - 點擊編輯 icon 時發出，傳遞 item。\n * @event delete - 點擊刪除 icon 時發出，傳遞 item。\n * @event update - 細項勾選時發出，傳遞更新後的 item。\n */\nimport { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'\nimport { computed } from 'vue'\nconst emit = defineEmits(['edit', 'delete', 'update'])\nconst props = defineProps({\n  /**\n   * 任務卡片資料物件\n   * @type {Object}\n   */\n  item: {\n    type: Object,\n    required: true\n  },\n  /**\n   * 所屬清單名稱\n   * @type {String}\n   */\n  listTitle: {\n    type: String,\n    required: true\n  }\n})\n\n/**\n * 卡片狀態 class 計算屬性\n * - is-due: 即將到期\n * - is-overdue: 已逾期\n * - completed-card: 已完成\n */\nconst cardClasses = computed(() => ({\n  'is-due': isDue.value,\n  'is-overdue': isOverdue.value,\n  'completed-card': props.listTitle === '完成'\n}))\n\n/**\n * 取得日期 timestamp\n * @returns {number}\n */\nconst timestamp = computed(() => Number(new Date(props.item.date)))\n\n/**\n * 是否逾期\n * @returns {boolean}\n */\nconst isOverdue = computed(() => timestamp.value && timestamp.value < Date.now())\n\n/**\n * 是否進入即將到期區間（3天內）\n * @returns {boolean}\n */\nconst isDue = computed(() => {\n  const date = timestamp.value\n  const due = date - (1000 * 60 * 60 * 24) * 3\n  const now = Date.now()\n  return date > now && now > due\n})\n\n/**\n * 發送編輯事件\n * @fires edit\n */",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "emitDelete",
+          "jsdoc": "/**\n * 卡片組件 Card.vue\n * 顯示單一任務卡片內容，包含標題、描述、細項、圖片、日期與操作 icon。\n * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。\n * - 支援編輯、刪除、細項切換等互動。\n * @module Card\n * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、圖片、細項等。\n * @prop {String} listTitle - 所屬清單名稱。\n * @event edit - 點擊編輯 icon 時發出，傳遞 item。\n * @event delete - 點擊刪除 icon 時發出，傳遞 item。\n * @event update - 細項勾選時發出，傳遞更新後的 item。\n */\nimport { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'\nimport { computed } from 'vue'\nconst emit = defineEmits(['edit', 'delete', 'update'])\nconst props = defineProps({\n  /**\n   * 任務卡片資料物件\n   * @type {Object}\n   */\n  item: {\n    type: Object,\n    required: true\n  },\n  /**\n   * 所屬清單名稱\n   * @type {String}\n   */\n  listTitle: {\n    type: String,\n    required: true\n  }\n})\n\n/**\n * 卡片狀態 class 計算屬性\n * - is-due: 即將到期\n * - is-overdue: 已逾期\n * - completed-card: 已完成\n */\nconst cardClasses = computed(() => ({\n  'is-due': isDue.value,\n  'is-overdue': isOverdue.value,\n  'completed-card': props.listTitle === '完成'\n}))\n\n/**\n * 取得日期 timestamp\n * @returns {number}\n */\nconst timestamp = computed(() => Number(new Date(props.item.date)))\n\n/**\n * 是否逾期\n * @returns {boolean}\n */\nconst isOverdue = computed(() => timestamp.value && timestamp.value < Date.now())\n\n/**\n * 是否進入即將到期區間（3天內）\n * @returns {boolean}\n */\nconst isDue = computed(() => {\n  const date = timestamp.value\n  const due = date - (1000 * 60 * 60 * 24) * 3\n  const now = Date.now()\n  return date > now && now > due\n})\n\n/**\n * 發送編輯事件\n * @fires edit\n */\nfunction emitEdit() {\n  emit('edit', props.item)\n}\n/**\n * 發送刪除事件\n * @fires delete\n */",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "formatCreatedAt",
+          "jsdoc": "/**\n * 卡片組件 Card.vue\n * 顯示單一任務卡片內容，包含標題、描述、細項、圖片、日期與操作 icon。\n * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。\n * - 支援編輯、刪除、細項切換等互動。\n * @module Card\n * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、圖片、細項等。\n * @prop {String} listTitle - 所屬清單名稱。\n * @event edit - 點擊編輯 icon 時發出，傳遞 item。\n * @event delete - 點擊刪除 icon 時發出，傳遞 item。\n * @event update - 細項勾選時發出，傳遞更新後的 item。\n */\nimport { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'\nimport { computed } from 'vue'\nconst emit = defineEmits(['edit', 'delete', 'update'])\nconst props = defineProps({\n  /**\n   * 任務卡片資料物件\n   * @type {Object}\n   */\n  item: {\n    type: Object,\n    required: true\n  },\n  /**\n   * 所屬清單名稱\n   * @type {String}\n   */\n  listTitle: {\n    type: String,\n    required: true\n  }\n})\n\n/**\n * 卡片狀態 class 計算屬性\n * - is-due: 即將到期\n * - is-overdue: 已逾期\n * - completed-card: 已完成\n */\nconst cardClasses = computed(() => ({\n  'is-due': isDue.value,\n  'is-overdue': isOverdue.value,\n  'completed-card': props.listTitle === '完成'\n}))\n\n/**\n * 取得日期 timestamp\n * @returns {number}\n */\nconst timestamp = computed(() => Number(new Date(props.item.date)))\n\n/**\n * 是否逾期\n * @returns {boolean}\n */\nconst isOverdue = computed(() => timestamp.value && timestamp.value < Date.now())\n\n/**\n * 是否進入即將到期區間（3天內）\n * @returns {boolean}\n */\nconst isDue = computed(() => {\n  const date = timestamp.value\n  const due = date - (1000 * 60 * 60 * 24) * 3\n  const now = Date.now()\n  return date > now && now > due\n})\n\n/**\n * 發送編輯事件\n * @fires edit\n */\nfunction emitEdit() {\n  emit('edit', props.item)\n}\n/**\n * 發送刪除事件\n * @fires delete\n */\nfunction emitDelete() {\n  emit('delete', props.item)\n}\n/**\n * 格式化日期顯示（yyyy/MM/dd HH:mm）\n * @param {string|Date} createdAt - 時間字串或物件\n * @returns {string}\n */",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "toggleSubItem",
+          "jsdoc": "/**\n * 卡片組件 Card.vue\n * 顯示單一任務卡片內容，包含標題、描述、細項、圖片、日期與操作 icon。\n * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。\n * - 支援編輯、刪除、細項切換等互動。\n * @module Card\n * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、圖片、細項等。\n * @prop {String} listTitle - 所屬清單名稱。\n * @event edit - 點擊編輯 icon 時發出，傳遞 item。\n * @event delete - 點擊刪除 icon 時發出，傳遞 item。\n * @event update - 細項勾選時發出，傳遞更新後的 item。\n */\nimport { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'\nimport { computed } from 'vue'\nconst emit = defineEmits(['edit', 'delete', 'update'])\nconst props = defineProps({\n  /**\n   * 任務卡片資料物件\n   * @type {Object}\n   */\n  item: {\n    type: Object,\n    required: true\n  },\n  /**\n   * 所屬清單名稱\n   * @type {String}\n   */\n  listTitle: {\n    type: String,\n    required: true\n  }\n})\n\n/**\n * 卡片狀態 class 計算屬性\n * - is-due: 即將到期\n * - is-overdue: 已逾期\n * - completed-card: 已完成\n */\nconst cardClasses = computed(() => ({\n  'is-due': isDue.value,\n  'is-overdue': isOverdue.value,\n  'completed-card': props.listTitle === '完成'\n}))\n\n/**\n * 取得日期 timestamp\n * @returns {number}\n */\nconst timestamp = computed(() => Number(new Date(props.item.date)))\n\n/**\n * 是否逾期\n * @returns {boolean}\n */\nconst isOverdue = computed(() => timestamp.value && timestamp.value < Date.now())\n\n/**\n * 是否進入即將到期區間（3天內）\n * @returns {boolean}\n */\nconst isDue = computed(() => {\n  const date = timestamp.value\n  const due = date - (1000 * 60 * 60 * 24) * 3\n  const now = Date.now()\n  return date > now && now > due\n})\n\n/**\n * 發送編輯事件\n * @fires edit\n */\nfunction emitEdit() {\n  emit('edit', props.item)\n}\n/**\n * 發送刪除事件\n * @fires delete\n */\nfunction emitDelete() {\n  emit('delete', props.item)\n}\n/**\n * 格式化日期顯示（yyyy/MM/dd HH:mm）\n * @param {string|Date} createdAt - 時間字串或物件\n * @returns {string}\n */\nfunction formatCreatedAt(createdAt) {\n  if (!createdAt) return ''\n  const d = new Date(createdAt)\n  const yyyy = d.getFullYear()\n  const mm = (d.getMonth() + 1).toString().padStart(2, '0')\n  const dd = d.getDate().toString().padStart(2, '0')\n  const hh = d.getHours().toString().padStart(2, '0')\n  const min = d.getMinutes().toString().padStart(2, '0')\n  return `${yyyy}/${mm}/${dd} ${hh}:${min}`\n}\n/**\n * 細項勾選切換，發送 update 事件\n * @param {number} idx - 細項索引\n * @fires update\n */",
+          "inputs": [],
+          "output": null
+        }
+      ]
     },
     {
       "type": "file",
-      "path": "components/UiItemForm.vue"
+      "path": "components/UiItemForm.vue",
+      "functions": [
+        {
+          "name": "onSubmit",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "onCancel",
+          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    date: form.date // 確保 date 一定帶出\n  })\n  resetForm()\n}",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "resetForm",
+          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    date: form.date // 確保 date 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "onImageUpload",
+          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    date: form.date // 確保 date 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }\nfunction resetForm() {\n  Object.assign(form, { id: null, title: '', description: '', date: null, images: [] })\n  errorMsg.value = ''\n  nextTick(() => formRef.value?.clearValidate?.())\n}\nconst errorMsg = ref('')",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "removeImage",
+          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    date: form.date // 確保 date 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }\nfunction resetForm() {\n  Object.assign(form, { id: null, title: '', description: '', date: null, images: [] })\n  errorMsg.value = ''\n  nextTick(() => formRef.value?.clearValidate?.())\n}\nconst errorMsg = ref('')\nfunction onImageUpload(e) {\n  const file = e.target.files[0]\n  if (!file) return\n  if (file.size > 1024 * 1024) {\n    errorMsg.value = '圖片大小不能超過 1MB'\n    return\n  }\n  const reader = new FileReader()\n  reader.onload = (evt) => {\n    const base64 = evt.target.result\n    form.images.push(base64)\n  }\n  reader.readAsDataURL(file)\n}",
+          "inputs": [],
+          "output": null
+        }
+      ]
     },
     {
       "type": "file",
-      "path": "components/UiModal.vue"
+      "path": "components/UiModal.vue",
+      "functions": [
+        {
+          "name": "onCancel",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        }
+      ]
     },
     {
       "type": "file",
-      "path": "components/HelloWorld.vue"
+      "path": "components/HelloWorld.vue",
+      "functions": []
     },
     {
       "type": "file",
-      "path": "components/CardDetail.vue"
+      "path": "components/CardDetail.vue",
+      "functions": [
+        {
+          "name": "onCloseClick",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "onConfirmClick",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "saveTitle",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "resetTitle",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "saveDesc",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "resetDesc",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "emitUpdate",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "getImageFromStorage",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "removeImage",
+          "jsdoc": "// TODO: 實際專案請實作圖片讀取\n  return ''\n}",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "triggerFileInput",
+          "jsdoc": "// TODO: 實際專案請實作圖片讀取\n  return ''\n}\nfunction removeImage(imgId) {\n  // TODO: 實際專案請實作圖片刪除\n  editImages.value = editImages.value.filter(id => id !== imgId)\n  emitUpdate()\n}",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "onImageUpload",
+          "jsdoc": "// TODO: 實際專案請實作圖片讀取\n  return ''\n}\nfunction removeImage(imgId) {\n  // TODO: 實際專案請實作圖片刪除\n  editImages.value = editImages.value.filter(id => id !== imgId)\n  emitUpdate()\n}\nfunction triggerFileInput() {\n  // 觸發 input[type=file]\n  document.querySelector('input[type=file][ref=fileInput]')?.click()\n}",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "addSubItem",
+          "jsdoc": "// TODO: 實際專案請實作圖片讀取\n  return ''\n}\nfunction removeImage(imgId) {\n  // TODO: 實際專案請實作圖片刪除\n  editImages.value = editImages.value.filter(id => id !== imgId)\n  emitUpdate()\n}\nfunction triggerFileInput() {\n  // 觸發 input[type=file]\n  document.querySelector('input[type=file][ref=fileInput]')?.click()\n}\nfunction onImageUpload(e) {\n  const file = e.target.files[0]\n  if (!file) return\n  if (file.size > 1024 * 1024) {\n    alert('圖片大小不能超過 1MB')\n    return\n  }\n  const reader = new FileReader()\n  reader.onload = (evt) => {\n    const base64 = evt.target.result\n    // TODO: 請根據專案需求存儲圖片並獲取 imgId\n    // const imgId = saveImageToStorage(base64)\n    // if (imgId) {\n    //   editImages.value.push(imgId)\n    //   emitUpdate()\n    // }\n  }\n  reader.readAsDataURL(file)\n}",
+          "inputs": [],
+          "output": null
+        }
+      ]
     },
     {
       "type": "file",
-      "path": "views/BoardView.vue"
+      "path": "views/BoardView.vue",
+      "functions": [
+        {
+          "name": "onListChange",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "onCardChange",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "openAddCardDialog",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "closeAddCardDialog",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "handleImageUpload",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "removeImage",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "submitAddCard",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}\nfunction removeImage(idx) {\n  addCardDialog.images.splice(idx, 1)\n}",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "addList",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}\nfunction removeImage(idx) {\n  addCardDialog.images.splice(idx, 1)\n}\nfunction submitAddCard() {\n  if (!addCardDialog.title) return\n  board.addCard(\n    addCardDialog.listId,\n    {\n      title: addCardDialog.title,\n      description: addCardDialog.description,\n      date: addCardDialog.date,\n      images: addCardDialog.images.map(img => img.url)\n    }\n  )\n  closeAddCardDialog()\n}",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "deleteList",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}\nfunction removeImage(idx) {\n  addCardDialog.images.splice(idx, 1)\n}\nfunction submitAddCard() {\n  if (!addCardDialog.title) return\n  board.addCard(\n    addCardDialog.listId,\n    {\n      title: addCardDialog.title,\n      description: addCardDialog.description,\n      date: addCardDialog.date,\n      images: addCardDialog.images.map(img => img.url)\n    }\n  )\n  closeAddCardDialog()\n}\n\nfunction addList() {\n  errorMsg.value = ''\n  if (!newListTitle.value) {\n    errorMsg.value = '清單名稱不能為空'\n    return\n  }\n  board.addList(newListTitle.value)\n  newListTitle.value = ''\n}",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "openForm",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}\nfunction removeImage(idx) {\n  addCardDialog.images.splice(idx, 1)\n}\nfunction submitAddCard() {\n  if (!addCardDialog.title) return\n  board.addCard(\n    addCardDialog.listId,\n    {\n      title: addCardDialog.title,\n      description: addCardDialog.description,\n      date: addCardDialog.date,\n      images: addCardDialog.images.map(img => img.url)\n    }\n  )\n  closeAddCardDialog()\n}\n\nfunction addList() {\n  errorMsg.value = ''\n  if (!newListTitle.value) {\n    errorMsg.value = '清單名稱不能為空'\n    return\n  }\n  board.addList(newListTitle.value)\n  newListTitle.value = ''\n}\n\nfunction deleteList(id) { board.deleteList(id) }",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "openEditForm",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}\nfunction removeImage(idx) {\n  addCardDialog.images.splice(idx, 1)\n}\nfunction submitAddCard() {\n  if (!addCardDialog.title) return\n  board.addCard(\n    addCardDialog.listId,\n    {\n      title: addCardDialog.title,\n      description: addCardDialog.description,\n      date: addCardDialog.date,\n      images: addCardDialog.images.map(img => img.url)\n    }\n  )\n  closeAddCardDialog()\n}\n\nfunction addList() {\n  errorMsg.value = ''\n  if (!newListTitle.value) {\n    errorMsg.value = '清單名稱不能為空'\n    return\n  }\n  board.addList(newListTitle.value)\n  newListTitle.value = ''\n}\n\nfunction deleteList(id) { board.deleteList(id) }\nfunction openForm(listId) { openAddCardDialog(listId) }",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "onFormSubmit",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}\nfunction removeImage(idx) {\n  addCardDialog.images.splice(idx, 1)\n}\nfunction submitAddCard() {\n  if (!addCardDialog.title) return\n  board.addCard(\n    addCardDialog.listId,\n    {\n      title: addCardDialog.title,\n      description: addCardDialog.description,\n      date: addCardDialog.date,\n      images: addCardDialog.images.map(img => img.url)\n    }\n  )\n  closeAddCardDialog()\n}\n\nfunction addList() {\n  errorMsg.value = ''\n  if (!newListTitle.value) {\n    errorMsg.value = '清單名稱不能為空'\n    return\n  }\n  board.addList(newListTitle.value)\n  newListTitle.value = ''\n}\n\nfunction deleteList(id) { board.deleteList(id) }\nfunction openForm(listId) { openAddCardDialog(listId) }\nfunction openEditForm(item, list) { formDialog.listId = list.id; formDialog.data = { ...item }; formDialog.edit = true; formDialog.editId = item.id; formDialog.visible = true }",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "closeForm",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}\nfunction removeImage(idx) {\n  addCardDialog.images.splice(idx, 1)\n}\nfunction submitAddCard() {\n  if (!addCardDialog.title) return\n  board.addCard(\n    addCardDialog.listId,\n    {\n      title: addCardDialog.title,\n      description: addCardDialog.description,\n      date: addCardDialog.date,\n      images: addCardDialog.images.map(img => img.url)\n    }\n  )\n  closeAddCardDialog()\n}\n\nfunction addList() {\n  errorMsg.value = ''\n  if (!newListTitle.value) {\n    errorMsg.value = '清單名稱不能為空'\n    return\n  }\n  board.addList(newListTitle.value)\n  newListTitle.value = ''\n}\n\nfunction deleteList(id) { board.deleteList(id) }\nfunction openForm(listId) { openAddCardDialog(listId) }\nfunction openEditForm(item, list) { formDialog.listId = list.id; formDialog.data = { ...item }; formDialog.edit = true; formDialog.editId = item.id; formDialog.visible = true }\nfunction onFormSubmit(data) { formDialog.edit && formDialog.editId ? board.updateItem(formDialog.listId, { ...data, id: formDialog.editId }) : board.addCard(formDialog.listId, data); closeForm() }",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "deleteItem",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}\nfunction removeImage(idx) {\n  addCardDialog.images.splice(idx, 1)\n}\nfunction submitAddCard() {\n  if (!addCardDialog.title) return\n  board.addCard(\n    addCardDialog.listId,\n    {\n      title: addCardDialog.title,\n      description: addCardDialog.description,\n      date: addCardDialog.date,\n      images: addCardDialog.images.map(img => img.url)\n    }\n  )\n  closeAddCardDialog()\n}\n\nfunction addList() {\n  errorMsg.value = ''\n  if (!newListTitle.value) {\n    errorMsg.value = '清單名稱不能為空'\n    return\n  }\n  board.addList(newListTitle.value)\n  newListTitle.value = ''\n}\n\nfunction deleteList(id) { board.deleteList(id) }\nfunction openForm(listId) { openAddCardDialog(listId) }\nfunction openEditForm(item, list) { formDialog.listId = list.id; formDialog.data = { ...item }; formDialog.edit = true; formDialog.editId = item.id; formDialog.visible = true }\nfunction onFormSubmit(data) { formDialog.edit && formDialog.editId ? board.updateItem(formDialog.listId, { ...data, id: formDialog.editId }) : board.addCard(formDialog.listId, data); closeForm() }\nfunction closeForm() { formDialog.visible = false; formDialog.data = {}; formDialog.edit = false; formDialog.editId = null }",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "updateItem",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}\nfunction removeImage(idx) {\n  addCardDialog.images.splice(idx, 1)\n}\nfunction submitAddCard() {\n  if (!addCardDialog.title) return\n  board.addCard(\n    addCardDialog.listId,\n    {\n      title: addCardDialog.title,\n      description: addCardDialog.description,\n      date: addCardDialog.date,\n      images: addCardDialog.images.map(img => img.url)\n    }\n  )\n  closeAddCardDialog()\n}\n\nfunction addList() {\n  errorMsg.value = ''\n  if (!newListTitle.value) {\n    errorMsg.value = '清單名稱不能為空'\n    return\n  }\n  board.addList(newListTitle.value)\n  newListTitle.value = ''\n}\n\nfunction deleteList(id) { board.deleteList(id) }\nfunction openForm(listId) { openAddCardDialog(listId) }\nfunction openEditForm(item, list) { formDialog.listId = list.id; formDialog.data = { ...item }; formDialog.edit = true; formDialog.editId = item.id; formDialog.visible = true }\nfunction onFormSubmit(data) { formDialog.edit && formDialog.editId ? board.updateItem(formDialog.listId, { ...data, id: formDialog.editId }) : board.addCard(formDialog.listId, data); closeForm() }\nfunction closeForm() { formDialog.visible = false; formDialog.data = {}; formDialog.edit = false; formDialog.editId = null }\nfunction deleteItem(listId, itemId) { board.deleteItem(listId, itemId) }",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "openDetail",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}\nfunction removeImage(idx) {\n  addCardDialog.images.splice(idx, 1)\n}\nfunction submitAddCard() {\n  if (!addCardDialog.title) return\n  board.addCard(\n    addCardDialog.listId,\n    {\n      title: addCardDialog.title,\n      description: addCardDialog.description,\n      date: addCardDialog.date,\n      images: addCardDialog.images.map(img => img.url)\n    }\n  )\n  closeAddCardDialog()\n}\n\nfunction addList() {\n  errorMsg.value = ''\n  if (!newListTitle.value) {\n    errorMsg.value = '清單名稱不能為空'\n    return\n  }\n  board.addList(newListTitle.value)\n  newListTitle.value = ''\n}\n\nfunction deleteList(id) { board.deleteList(id) }\nfunction openForm(listId) { openAddCardDialog(listId) }\nfunction openEditForm(item, list) { formDialog.listId = list.id; formDialog.data = { ...item }; formDialog.edit = true; formDialog.editId = item.id; formDialog.visible = true }\nfunction onFormSubmit(data) { formDialog.edit && formDialog.editId ? board.updateItem(formDialog.listId, { ...data, id: formDialog.editId }) : board.addCard(formDialog.listId, data); closeForm() }\nfunction closeForm() { formDialog.visible = false; formDialog.data = {}; formDialog.edit = false; formDialog.editId = null }\nfunction deleteItem(listId, itemId) { board.deleteItem(listId, itemId) }\nfunction updateItem(listId, item) { board.updateItem(listId, item) }",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "closeDetail",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}\nfunction removeImage(idx) {\n  addCardDialog.images.splice(idx, 1)\n}\nfunction submitAddCard() {\n  if (!addCardDialog.title) return\n  board.addCard(\n    addCardDialog.listId,\n    {\n      title: addCardDialog.title,\n      description: addCardDialog.description,\n      date: addCardDialog.date,\n      images: addCardDialog.images.map(img => img.url)\n    }\n  )\n  closeAddCardDialog()\n}\n\nfunction addList() {\n  errorMsg.value = ''\n  if (!newListTitle.value) {\n    errorMsg.value = '清單名稱不能為空'\n    return\n  }\n  board.addList(newListTitle.value)\n  newListTitle.value = ''\n}\n\nfunction deleteList(id) { board.deleteList(id) }\nfunction openForm(listId) { openAddCardDialog(listId) }\nfunction openEditForm(item, list) { formDialog.listId = list.id; formDialog.data = { ...item }; formDialog.edit = true; formDialog.editId = item.id; formDialog.visible = true }\nfunction onFormSubmit(data) { formDialog.edit && formDialog.editId ? board.updateItem(formDialog.listId, { ...data, id: formDialog.editId }) : board.addCard(formDialog.listId, data); closeForm() }\nfunction closeForm() { formDialog.visible = false; formDialog.data = {}; formDialog.edit = false; formDialog.editId = null }\nfunction deleteItem(listId, itemId) { board.deleteItem(listId, itemId) }\nfunction updateItem(listId, item) { board.updateItem(listId, item) }\nfunction openDetail(item, list) { detailDialog.item = { ...item }; detailDialog.listTitle = list.title; detailDialog.visible = true }",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "onDetailUpdate",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}\nfunction removeImage(idx) {\n  addCardDialog.images.splice(idx, 1)\n}\nfunction submitAddCard() {\n  if (!addCardDialog.title) return\n  board.addCard(\n    addCardDialog.listId,\n    {\n      title: addCardDialog.title,\n      description: addCardDialog.description,\n      date: addCardDialog.date,\n      images: addCardDialog.images.map(img => img.url)\n    }\n  )\n  closeAddCardDialog()\n}\n\nfunction addList() {\n  errorMsg.value = ''\n  if (!newListTitle.value) {\n    errorMsg.value = '清單名稱不能為空'\n    return\n  }\n  board.addList(newListTitle.value)\n  newListTitle.value = ''\n}\n\nfunction deleteList(id) { board.deleteList(id) }\nfunction openForm(listId) { openAddCardDialog(listId) }\nfunction openEditForm(item, list) { formDialog.listId = list.id; formDialog.data = { ...item }; formDialog.edit = true; formDialog.editId = item.id; formDialog.visible = true }\nfunction onFormSubmit(data) { formDialog.edit && formDialog.editId ? board.updateItem(formDialog.listId, { ...data, id: formDialog.editId }) : board.addCard(formDialog.listId, data); closeForm() }\nfunction closeForm() { formDialog.visible = false; formDialog.data = {}; formDialog.edit = false; formDialog.editId = null }\nfunction deleteItem(listId, itemId) { board.deleteItem(listId, itemId) }\nfunction updateItem(listId, item) { board.updateItem(listId, item) }\nfunction openDetail(item, list) { detailDialog.item = { ...item }; detailDialog.listTitle = list.title; detailDialog.visible = true }\nfunction closeDetail() { detailDialog.visible = false }",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "resetLists",
+          "jsdoc": "// 處理清單拖移 (vue3-draggable-next)\nfunction onListChange(evt) {\n  const { moved } = evt\n  if (moved) board.moveList(moved.oldIndex, moved.newIndex)\n}\n\n// 處理卡片拖移 (vue3-draggable-next)\nfunction onCardChange(list, evt) {\n  const { added, removed } = evt\n  if (removed && added) {\n    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)\n  }\n}\n\n// 新增卡片彈窗狀態\nconst addCardDialog = reactive({\n  visible: false,\n  listId: null,\n  title: '',\n  description: '',\n  date: '',\n  images: []\n})\n\nfunction openAddCardDialog(listId) {\n  addCardDialog.visible = true\n  addCardDialog.listId = listId\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nfunction closeAddCardDialog() {\n  addCardDialog.visible = false\n  addCardDialog.listId = null\n  addCardDialog.title = ''\n  addCardDialog.description = ''\n  addCardDialog.date = ''\n  addCardDialog.images = []\n}\nasync function handleImageUpload(e) {\n  const files = Array.from(e.target.files)\n  // 轉 base64 預覽\n  addCardDialog.images = await Promise.all(files.map(file => {\n    return new Promise(resolve => {\n      const reader = new FileReader()\n      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })\n      reader.readAsDataURL(file)\n    })\n  }))\n}\nfunction removeImage(idx) {\n  addCardDialog.images.splice(idx, 1)\n}\nfunction submitAddCard() {\n  if (!addCardDialog.title) return\n  board.addCard(\n    addCardDialog.listId,\n    {\n      title: addCardDialog.title,\n      description: addCardDialog.description,\n      date: addCardDialog.date,\n      images: addCardDialog.images.map(img => img.url)\n    }\n  )\n  closeAddCardDialog()\n}\n\nfunction addList() {\n  errorMsg.value = ''\n  if (!newListTitle.value) {\n    errorMsg.value = '清單名稱不能為空'\n    return\n  }\n  board.addList(newListTitle.value)\n  newListTitle.value = ''\n}\n\nfunction deleteList(id) { board.deleteList(id) }\nfunction openForm(listId) { openAddCardDialog(listId) }\nfunction openEditForm(item, list) { formDialog.listId = list.id; formDialog.data = { ...item }; formDialog.edit = true; formDialog.editId = item.id; formDialog.visible = true }\nfunction onFormSubmit(data) { formDialog.edit && formDialog.editId ? board.updateItem(formDialog.listId, { ...data, id: formDialog.editId }) : board.addCard(formDialog.listId, data); closeForm() }\nfunction closeForm() { formDialog.visible = false; formDialog.data = {}; formDialog.edit = false; formDialog.editId = null }\nfunction deleteItem(listId, itemId) { board.deleteItem(listId, itemId) }\nfunction updateItem(listId, item) { board.updateItem(listId, item) }\nfunction openDetail(item, list) { detailDialog.item = { ...item }; detailDialog.listTitle = list.title; detailDialog.visible = true }\nfunction closeDetail() { detailDialog.visible = false }\nfunction onDetailUpdate(item) { board.updateItemByTitle(detailDialog.listTitle, item) }",
+          "inputs": [],
+          "output": null
+        }
+      ]
     },
     {
       "type": "file",
-      "path": "views/HomeView.vue"
+      "path": "views/HomeView.vue",
+      "functions": []
     },
     {
       "type": "file",
@@ -74,7 +349,8 @@
     },
     {
       "type": "file",
-      "path": "router/index.js"
+      "path": "router/index.js",
+      "functions": []
     }
   ],
   "components": {
