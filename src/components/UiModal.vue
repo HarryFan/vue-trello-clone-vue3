@@ -31,7 +31,7 @@ function onCancel() {
   border-radius: 12px;
   box-shadow: 0 4px 24px #1976d244, 0 2px 8px #b6d4ff44;
   padding: 32px 28px 24px 28px;
-  min-width: 320px;
+  min-width: 520px;
   max-width: 90vw;
   min-height: 120px;
   position: relative;

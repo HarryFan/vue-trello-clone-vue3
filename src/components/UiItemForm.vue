@@ -54,7 +54,11 @@ function onSubmit() {
     errorMsg.value = '請填寫標題！'
     return
   }
-  emit('submit', { ...form })
+  // 送出時帶入所有欄位
+  emit('submit', {
+    ...form,
+    date: form.date // 確保 date 一定帶出
+  })
   resetForm()
 }
 function onCancel() { emit('cancel') }

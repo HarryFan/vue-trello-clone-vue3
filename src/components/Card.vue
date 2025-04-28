@@ -1,17 +1,21 @@
 <template>
   <div class="card" :class="cardClasses" :data-id="item.id">
     <div class="icons">
-      <span v-if="isDue" class="icon icon-due" :title="`Item is due on ${item.date}`">
+      <span v-if="isDue" class="icon icon-due tooltip" :title="`即將到期：${item.date}`">
         <font-awesome-icon :icon="['fas','star']" />
+        <span class="tooltip-text">即將到期</span>
       </span>
-      <span v-else-if="timestamp" class="icon icon-date" :title="`Item is due on ${item.date}`">
+      <span v-else-if="timestamp" class="icon icon-date tooltip" :title="`提醒：${item.date}`">
         <font-awesome-icon :icon="['fas','bell']" />
+        <span class="tooltip-text">提醒</span>
       </span>
-      <span class="icon icon-edit" @click="emitEdit">
+      <span class="icon icon-edit tooltip" @click="emitEdit" title="編輯任務">
         <font-awesome-icon :icon="['fas','pen-to-square']" />
+        <span class="tooltip-text">編輯</span>
       </span>
-      <span class="icon icon-delete" @click.stop="emitDelete" title="刪除任務">
+      <span class="icon icon-delete tooltip" @click.stop="emitDelete" title="刪除任務">
         <font-awesome-icon :icon="['fas','trash']" />
+        <span class="tooltip-text">刪除</span>
       </span>
     </div>
     <div v-if="item.images && item.images.length" class="card-images">
@@ -27,7 +31,11 @@
           <span :class="{ 'completed': sub.isCompleted }">{{ sub.text }}</span>
         </div>
       </div>
-      <p class="item-timestamp" v-if="item.updatedAt && item.updatedAt !== item.createdAt">
+      <p class="item-timestamp" v-if="item.date">
+        <span class="timestamp-label">日期：</span>
+        <span class="timestamp-value">{{ item.date }}</span>
+      </p>
+      <p class="item-timestamp" v-else-if="item.updatedAt && item.updatedAt !== item.createdAt">
         <span class="timestamp-label">更新：</span>
         <span class="timestamp-value">{{ formatCreatedAt(item.updatedAt) }}</span>
       </p>
@@ -248,5 +256,32 @@ function toggleSubItem(idx) {
 .completed {
   text-decoration: line-through;
   color: #bbb;
+}
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: max-content;
+  background: #222;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 3px 8px;
+  position: absolute;
+  z-index: 10;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.18s;
+  font-size: 0.83em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }
 </style>

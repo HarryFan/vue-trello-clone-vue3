@@ -120,7 +120,12 @@ export const useBoardStore = defineStore('board', {
       if (list) {
         const idx = list.items.findIndex(i => i.id === updatedItem.id)
         if (idx !== -1) {
-          list.items[idx] = { ...updatedItem }
+          // 若有 updatedItem.date，則同步更新卡片的 date
+          list.items[idx] = {
+            ...list.items[idx],
+            ...updatedItem,
+            date: updatedItem.date !== undefined ? updatedItem.date : list.items[idx].date,
+          }
           this.persist()
         }
       }
