@@ -221,7 +221,7 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
   }
   button.warning {
     position: absolute;
-    right: 0;
+    right: 20px;
     top: 0;
     margin: 0;
     flex-shrink: 0;
@@ -251,7 +251,7 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
 .list-column, .new-list-column {
   display: inline-block;
   vertical-align: top;
-  width: 320px;
+  width: 345px;
   min-width: 220px;
   max-width: 100vw;
   margin: 5px 20px 5px 0;
