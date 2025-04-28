@@ -1,0 +1,42 @@
+<svg width="600pt" height="900pt" viewBox="0 0 600 900" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    text { font-family: 'Noto Sans TC', sans-serif; font-size: 19px; }
+    ellipse { stroke: #333; }
+  </style>
+  <g>
+    <ellipse cx="300" cy="70" rx="170" ry="28" fill="#b3e5fc" />
+    <text x="300" y="77" text-anchor="middle">專案啟動（Vue 3 + Vite）</text>
+    <ellipse cx="300" cy="160" rx="170" ry="28" fill="#b3e5fc" />
+    <text x="300" y="167" text-anchor="middle">初期用 Element Plus 快速搭版</text>
+    <ellipse cx="300" cy="250" rx="185" ry="28" fill="#ffe082" />
+    <text x="300" y="257" text-anchor="middle">遇到拖曳排序相容性問題</text>
+    <ellipse cx="300" cy="340" rx="170" ry="28" fill="#ffd54f" />
+    <text x="300" y="347" text-anchor="middle">移除 Element Plus 排版元件</text>
+    <ellipse cx="300" cy="430" rx="160" ry="28" fill="#c8e6c9" />
+    <text x="300" y="437" text-anchor="middle">客製化 UI 結構（卡片/列表/彈窗）</text>
+    <ellipse cx="300" cy="520" rx="160" ry="28" fill="#c8e6c9" />
+    <text x="300" y="527" text-anchor="middle">整合 vue3-dnd 拖曳</text>
+    <ellipse cx="300" cy="610" rx="170" ry="28" fill="#c8e6c9" />
+    <text x="300" y="617" text-anchor="middle">優化拖曳流暢度、資料同步</text>
+    <ellipse cx="300" cy="700" rx="210" ry="28" fill="#b3e5fc" />
+    <text x="300" y="707" text-anchor="middle">開發 snapshot.py 自動產生 API 文件</text>
+    <ellipse cx="300" cy="790" rx="170" ry="28" fill="#b3e5fc" />
+    <text x="300" y="797" text-anchor="middle">專案完成（高效能、易維護）</text>
+    <!-- arrows -->
+    <g stroke="#333" fill="none" stroke-width="2">
+      <path d="M300,98 L300,132" marker-end="url(#arrow)" />
+      <path d="M300,188 L300,222" marker-end="url(#arrow)" />
+      <path d="M300,278 L300,312" marker-end="url(#arrow)" />
+      <path d="M300,368 L300,402" marker-end="url(#arrow)" />
+      <path d="M300,458 L300,492" marker-end="url(#arrow)" />
+      <path d="M300,548 L300,582" marker-end="url(#arrow)" />
+      <path d="M300,638 L300,672" marker-end="url(#arrow)" />
+      <path d="M300,728 L300,762" marker-end="url(#arrow)" />
+    </g>
+    <defs>
+      <marker id="arrow" markerWidth="13" markerHeight="13" refX="6.5" refY="6.5" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L13,6.5 L0,13 L4,6.5 Z" fill="#333" />
+      </marker>
+    </defs>
+  </g>
+</svg>
