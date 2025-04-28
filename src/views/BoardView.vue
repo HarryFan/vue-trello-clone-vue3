@@ -77,6 +77,10 @@
 </template>
 
 <script setup>
+// ===== 主要邏輯區 =====
+// 1. 狀態與元件註冊
+// 2. 拖曳、表單、彈窗等互動行為
+// 3. 清單/卡片 CRUD 操作
 import { ref, reactive, computed } from 'vue'
 import { useBoardStore } from '@/stores/board'
 import Card from '@/components/Card.vue'
@@ -84,20 +88,24 @@ import UiItemForm from '@/components/UiItemForm.vue'
 import UiModal from '@/components/UiModal.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Draggable from 'vue3-draggable-next'
+// Pinia 狀態管理，取得看板資料
+const board = useBoardStore() // 管理所有清單與卡片的資料
+// 取得所有清單（reactive，拖曳時自動更新）
+const lists = computed(() => board.lists) // 清單陣列
+// 新增清單的輸入框
+const newListTitle = ref('') // 新清單名稱
+// 新增卡片時暫存輸入內容
+const newCardText = ref({}) // 以清單 id 為 key，暫存每個清單的卡片內容
+// 錯誤訊息顯示
+const errorMsg = ref('') // 表單錯誤訊息
 
-const board = useBoardStore()
-const lists = computed(() => board.lists)
-const newListTitle = ref('')
-const newCardText = ref({})
-const errorMsg = ref('')
-
-// 處理清單拖移 (vue3-draggable-next)
+// 處理清單拖移（拖曳清單排序）
 function onListChange(evt) {
   const { moved } = evt
   if (moved) board.moveList(moved.oldIndex, moved.newIndex)
 }
 
-// 處理卡片拖移 (vue3-draggable-next)
+// 處理卡片拖移（卡片在清單間移動）
 function onCardChange(list, evt) {
   const { added, removed } = evt
   if (removed && added) {
@@ -105,17 +113,18 @@ function onCardChange(list, evt) {
   }
 }
 
-// 新增卡片彈窗狀態
+// 新增卡片彈窗的狀態管理
 const addCardDialog = reactive({
-  visible: false,
-  listId: null,
-  title: '',
-  description: '',
-  date: '',
-  images: [],
-  errors: {}
+  visible: false, // 是否顯示
+  listId: null, // 目標清單 id
+  title: '', // 卡片標題
+  description: '', // 卡片描述
+  date: '', // 卡片日期
+  images: [], // 預覽圖片
+  errors: {} // 表單驗證錯誤
 })
 
+// 驗證新增卡片表單（標題必填、長度限制）
 function validateAddCard() {
   const errors = {}
   if (!addCardDialog.title) {
@@ -123,11 +132,11 @@ function validateAddCard() {
   } else if (addCardDialog.title.length > 40) {
     errors.title = '標題長度不能超過 40 字'
   }
-  // 其他欄位驗證可依需求擴充
   addCardDialog.errors = errors
   return Object.keys(errors).length === 0
 }
 
+// 新增卡片：通過驗證才送出
 function submitAddCard() {
   if (!validateAddCard()) return
   board.addCard(
@@ -142,6 +151,7 @@ function submitAddCard() {
   closeAddCardDialog()
 }
 
+// 開啟新增卡片彈窗，初始化內容
 function openAddCardDialog(listId) {
   addCardDialog.visible = true
   addCardDialog.listId = listId
@@ -151,6 +161,7 @@ function openAddCardDialog(listId) {
   addCardDialog.images = []
   addCardDialog.errors = {}
 }
+// 關閉新增卡片彈窗
 function closeAddCardDialog() {
   addCardDialog.visible = false
   addCardDialog.listId = null
@@ -160,9 +171,9 @@ function closeAddCardDialog() {
   addCardDialog.images = []
   addCardDialog.errors = {}
 }
+// 上傳圖片，轉成 base64 預覽
 async function handleImageUpload(e) {
   const files = Array.from(e.target.files)
-  // 轉 base64 預覽
   addCardDialog.images = await Promise.all(files.map(file => {
     return new Promise(resolve => {
       const reader = new FileReader()
@@ -171,10 +182,12 @@ async function handleImageUpload(e) {
     })
   }))
 }
+// 移除預覽圖片
 function removeImage(idx) {
   addCardDialog.images.splice(idx, 1)
 }
 
+// 新增清單
 function addList() {
   errorMsg.value = ''
   if (!newListTitle.value) {
@@ -185,19 +198,32 @@ function addList() {
   newListTitle.value = ''
 }
 
+// 刪除清單
 function deleteList(id) { board.deleteList(id) }
+// 開啟新增卡片表單
 function openForm(listId) { openAddCardDialog(listId) }
+// 編輯卡片表單
 function openEditForm(item, list) { formDialog.listId = list.id; formDialog.data = { ...item }; formDialog.edit = true; formDialog.editId = item.id; formDialog.visible = true }
+// 表單送出（新增或編輯卡片）
 function onFormSubmit(data) { formDialog.edit && formDialog.editId ? board.updateItem(formDialog.listId, { ...data, id: formDialog.editId }) : board.addCard(formDialog.listId, data); closeForm() }
+// 關閉表單
 function closeForm() { formDialog.visible = false; formDialog.data = {}; formDialog.edit = false; formDialog.editId = null }
+// 刪除卡片
 function deleteItem(listId, itemId) { board.deleteItem(listId, itemId) }
+// 更新卡片內容
 function updateItem(listId, item) { board.updateItem(listId, item) }
+// 開啟卡片詳情
 function openDetail(item, list) { detailDialog.item = { ...item }; detailDialog.listTitle = list.title; detailDialog.visible = true }
+// 關閉卡片詳情
 function closeDetail() { detailDialog.visible = false }
+// 詳情頁直接更新卡片
 function onDetailUpdate(item) { board.updateItemByTitle(detailDialog.listTitle, item) }
+// 重設預設清單
 function resetLists() { board.resetDefaultLists(); alert('已重設預設清單') }
 
+// 卡片詳情彈窗狀態
 const detailDialog = reactive({ visible: false, item: {}, listTitle: '' })
+// 編輯/新增卡片表單彈窗狀態
 const formDialog = reactive({ visible: false, listId: null, data: {}, edit: false, editId: null })
 </script>
 
