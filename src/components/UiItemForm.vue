@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="onSubmit" class="ui-form">
+  <form @submit.prevent="onSubmit" class="ui-form popup-box-wide">
     <div class="form-group">
       <label>標題</label>
       <input v-model="form.title" placeholder="請輸入標題" required />
@@ -88,6 +88,22 @@ function removeImage(imgId) {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+.popup-box-wide {
+  min-width: 320px;
+  max-width: 520px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+@media (max-width: 600px) {
+  .popup-box-wide {
+    min-width: 0;
+    max-width: 98vw;
+    padding: 0 4vw;
+  }
 }
 .form-group {
   display: flex;

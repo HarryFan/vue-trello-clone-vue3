@@ -43,10 +43,12 @@
     </div>
 
     <UiModal v-model="formDialog.visible">
-      <UiItemForm :model-value="formDialog.data" @submit="onFormSubmit" @cancel="closeForm" />
+      <div class="popup-box-wide">
+        <UiItemForm :model-value="formDialog.data" @submit="onFormSubmit" @cancel="closeForm" />
+      </div>
     </UiModal>
     <UiModal v-model="addCardDialog.visible">
-      <div style="min-width:260px;max-width:380px;display:flex;flex-direction:column;gap:16px;">
+      <div class="popup-box-wide">
         <h3 style="margin:0 0 8px 0;font-size:1.2em;font-weight:600;">新增卡片</h3>
         <input v-model="addCardDialog.title" placeholder="請輸入卡片標題" style="padding:8px 10px;border-radius:6px;border:1.5px solid #e3f0fd;font-size:1em;outline:none;" @keyup.enter="submitAddCard" />
         <textarea v-model="addCardDialog.description" placeholder="描述 (選填)" style="padding:8px 10px;border-radius:6px;border:1.5px solid #e3f0fd;font-size:1em;min-height:60px;resize:vertical;"></textarea>
@@ -379,6 +381,23 @@ button {
     &:hover {
       background-color: #1565c0;
     }
+  }
+}
+
+.popup-box-wide {
+  min-width: 320px;
+  max-width: 520px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+@media (max-width: 600px) {
+  .popup-box-wide {
+    min-width: 0;
+    max-width: 98vw;
+    padding: 0 4vw;
   }
 }
 </style>
