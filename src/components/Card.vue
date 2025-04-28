@@ -1,13 +1,13 @@
 <template>
   <div class="card" :class="cardClasses" :data-id="item.id">
     <div class="icons">
-      <span v-if="isDue" class="icon icon-due tooltip" :title="`即將到期：${item.date}`">
+      <span v-if="isDue" class="icon icon-due tooltip" :title="`此任務將於 ${item.date} 到期，剩餘 ${getHoursLeft()} 小時，請盡快處理！`">
         <font-awesome-icon :icon="['fas','star']" />
-        <span class="tooltip-text">即將到期</span>
+        <span class="tooltip-text">任務即將到期，剩餘 {{ getHoursLeft() }} 小時</span>
       </span>
-      <span v-else-if="timestamp" class="icon icon-date tooltip" :title="`提醒：${item.date}`">
+      <span v-else-if="timestamp" class="icon icon-date tooltip" :title="`此任務已設定截止日期（${item.date}），目前距離到期超過 3 天`">
         <font-awesome-icon :icon="['fas','bell']" />
-        <span class="tooltip-text">提醒</span>
+        <span class="tooltip-text">已設定截止日期，尚未進入提醒區間</span>
       </span>
       <span class="icon icon-edit tooltip" @click="emitEdit" title="編輯任務">
         <font-awesome-icon :icon="['fas','pen-to-square']" />
@@ -32,12 +32,8 @@
         </div>
       </div>
       <p class="item-timestamp" v-if="item.date">
-        <span class="timestamp-label">日期：</span>
+        <span class="timestamp-label">任務截止日期：</span>
         <span class="timestamp-value">{{ item.date }}</span>
-      </p>
-      <p class="item-timestamp" v-else-if="item.updatedAt && item.updatedAt !== item.createdAt">
-        <span class="timestamp-label">更新：</span>
-        <span class="timestamp-value">{{ formatCreatedAt(item.updatedAt) }}</span>
       </p>
       <p class="item-timestamp" v-else-if="item.createdAt">
         <span class="timestamp-label">建立：</span>
@@ -116,6 +112,19 @@ const isDue = computed(() => {
   const now = Date.now()
   return date > now && now > due
 })
+
+/**
+ * 計算距離截止日剩餘小時數
+ * @returns {number|null}
+ */
+function getHoursLeft() {
+  if (!props.item.date) return null
+  const deadline = new Date(props.item.date).getTime()
+  const now = Date.now()
+  const diff = deadline - now
+  if (diff <= 0) return 0
+  return Math.ceil(diff / (1000 * 60 * 60))
+}
 
 /**
  * 發送編輯事件
@@ -304,6 +313,20 @@ function toggleSubItem(idx) {
   background: #ffebee;
   color: #c62828;
   box-shadow: 0 2px 8px #ffcdd233;
+}
+.icon-due {
+  color: #ff9800;
+}
+.icon-due:hover {
+  background: #fff3e0;
+  box-shadow: 0 2px 8px #ff980044;
+}
+.icon-date {
+  color: #1976d2;
+}
+.icon-date:hover {
+  background: #e3f2fd;
+  box-shadow: 0 2px 8px #1976d244;
 }
 .subitem-row {
   display: flex;
