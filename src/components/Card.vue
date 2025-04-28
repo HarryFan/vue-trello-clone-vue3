@@ -31,13 +31,17 @@
           <span :class="{ 'completed': sub.isCompleted }">{{ sub.text }}</span>
         </div>
       </div>
-      <p class="item-timestamp" v-if="item.deadline">
-        <span class="timestamp-label">任務截止日期：</span>
-        <span class="timestamp-value">{{ item.deadline }}</span>
-      </p>
-      <p class="item-timestamp" v-else-if="item.createdAt">
-        <span class="timestamp-label">建立：</span>
-        <span class="timestamp-value">{{ formatCreatedAt(item.createdAt) }}</span>
+      <p class="item-timestamp">
+        <template v-if="item.deadline">
+          <i class="far fa-calendar-alt"></i>
+          <span class="timestamp-label">任務截止日期：</span>
+          <span class="timestamp-value">{{ item.deadline }}</span>
+        </template>
+        <template v-else>
+          <i class="far fa-clock"></i>
+          <span class="timestamp-label">建立：</span>
+          <span class="timestamp-value">{{ formatCreatedAt(item.createdAt) }}</span>
+        </template>
       </p>
     </div>
   </div>

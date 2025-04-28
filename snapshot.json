@@ -105,25 +105,25 @@
         },
         {
           "name": "onCancel",
-          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    date: form.date // 確保 date 一定帶出\n  })\n  resetForm()\n}",
+          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    deadline: form.deadline // 確保 deadline 一定帶出\n  })\n  resetForm()\n}",
           "inputs": [],
           "output": null
         },
         {
           "name": "resetForm",
-          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    date: form.date // 確保 date 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }",
+          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    deadline: form.deadline // 確保 deadline 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }",
           "inputs": [],
           "output": null
         },
         {
           "name": "onImageUpload",
-          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    date: form.date // 確保 date 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }\nfunction resetForm() {\n  Object.assign(form, { id: null, title: '', description: '', date: null, images: [] })\n  errorMsg.value = ''\n  nextTick(() => formRef.value?.clearValidate?.())\n}\nconst errorMsg = ref('')",
+          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    deadline: form.deadline // 確保 deadline 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }\nfunction resetForm() {\n  Object.assign(form, { id: null, title: '', description: '', deadline: null, images: [] })\n  errorMsg.value = ''\n  nextTick(() => formRef.value?.clearValidate?.())\n}\nconst errorMsg = ref('')",
           "inputs": [],
           "output": null
         },
         {
           "name": "removeImage",
-          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    date: form.date // 確保 date 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }\nfunction resetForm() {\n  Object.assign(form, { id: null, title: '', description: '', date: null, images: [] })\n  errorMsg.value = ''\n  nextTick(() => formRef.value?.clearValidate?.())\n}\nconst errorMsg = ref('')\nfunction onImageUpload(e) {\n  const file = e.target.files[0]\n  if (!file) return\n  if (file.size > 1024 * 1024) {\n    errorMsg.value = '圖片大小不能超過 1MB'\n    return\n  }\n  const reader = new FileReader()\n  reader.onload = (evt) => {\n    const base64 = evt.target.result\n    form.images.push(base64)\n  }\n  reader.readAsDataURL(file)\n}",
+          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    deadline: form.deadline // 確保 deadline 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }\nfunction resetForm() {\n  Object.assign(form, { id: null, title: '', description: '', deadline: null, images: [] })\n  errorMsg.value = ''\n  nextTick(() => formRef.value?.clearValidate?.())\n}\nconst errorMsg = ref('')\nfunction onImageUpload(e) {\n  const file = e.target.files[0]\n  if (!file) return\n  if (file.size > 1024 * 1024) {\n    errorMsg.value = '圖片大小不能超過 1MB'\n    return\n  }\n  const reader = new FileReader()\n  reader.onload = (evt) => {\n    const base64 = evt.target.result\n    form.images.push(base64)\n  }\n  reader.readAsDataURL(file)\n}",
           "inputs": [],
           "output": null
         }
@@ -420,19 +420,19 @@
         },
         {
           "name": "onCancel",
-          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    date: form.date // 確保 date 一定帶出\n  })\n  resetForm()\n}"
+          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    deadline: form.deadline // 確保 deadline 一定帶出\n  })\n  resetForm()\n}"
         },
         {
           "name": "resetForm",
-          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    date: form.date // 確保 date 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }"
+          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    deadline: form.deadline // 確保 deadline 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }"
         },
         {
           "name": "onImageUpload",
-          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    date: form.date // 確保 date 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }\nfunction resetForm() {\n  Object.assign(form, { id: null, title: '', description: '', date: null, images: [] })\n  errorMsg.value = ''\n  nextTick(() => formRef.value?.clearValidate?.())\n}\nconst errorMsg = ref('')"
+          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    deadline: form.deadline // 確保 deadline 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }\nfunction resetForm() {\n  Object.assign(form, { id: null, title: '', description: '', deadline: null, images: [] })\n  errorMsg.value = ''\n  nextTick(() => formRef.value?.clearValidate?.())\n}\nconst errorMsg = ref('')"
         },
         {
           "name": "removeImage",
-          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    date: form.date // 確保 date 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }\nfunction resetForm() {\n  Object.assign(form, { id: null, title: '', description: '', date: null, images: [] })\n  errorMsg.value = ''\n  nextTick(() => formRef.value?.clearValidate?.())\n}\nconst errorMsg = ref('')\nfunction onImageUpload(e) {\n  const file = e.target.files[0]\n  if (!file) return\n  if (file.size > 1024 * 1024) {\n    errorMsg.value = '圖片大小不能超過 1MB'\n    return\n  }\n  const reader = new FileReader()\n  reader.onload = (evt) => {\n    const base64 = evt.target.result\n    form.images.push(base64)\n  }\n  reader.readAsDataURL(file)\n}"
+          "jsdoc": "// 送出時帶入所有欄位\n  emit('submit', {\n    ...form,\n    deadline: form.deadline // 確保 deadline 一定帶出\n  })\n  resetForm()\n}\nfunction onCancel() { emit('cancel') }\nfunction resetForm() {\n  Object.assign(form, { id: null, title: '', description: '', deadline: null, images: [] })\n  errorMsg.value = ''\n  nextTick(() => formRef.value?.clearValidate?.())\n}\nconst errorMsg = ref('')\nfunction onImageUpload(e) {\n  const file = e.target.files[0]\n  if (!file) return\n  if (file.size > 1024 * 1024) {\n    errorMsg.value = '圖片大小不能超過 1MB'\n    return\n  }\n  const reader = new FileReader()\n  reader.onload = (evt) => {\n    const base64 = evt.target.result\n    form.images.push(base64)\n  }\n  reader.readAsDataURL(file)\n}"
         }
       ]
     },
