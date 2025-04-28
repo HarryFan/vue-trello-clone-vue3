@@ -26,8 +26,7 @@
                 </Draggable>
               </div>
               <div class="item-entry">
-                <input v-model="newCardText[list.id]" placeholder="新增卡片" size="small" @keyup.enter="openForm(list.id)" />
-                <button type="button" class="primary" @click="openForm(list.id)">新增</button>
+                <button type="button" class="primary" @click="openAddCardDialog(list.id)">新增卡片</button>
               </div>
             </section>
           </template>
@@ -35,7 +34,7 @@
         <!-- 新增清單表單永遠在最右側，明顯區隔 -->
         <section class="new-list-column">
           <div class="new-list-inner">
-            <input v-model="newListTitle" placeholder="新增清單" size="small" @keyup.enter="addList" />
+            <input v-model="newListTitle" placeholder="新增清單" class="small-input" @keyup.enter="addList" />
             <button type="button" class="primary" @click="addList">新增清單</button>
             <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
           </div>
@@ -48,6 +47,32 @@
       @update="onDetailUpdate" @close="closeDetail" />
     <UiItemForm v-if="formDialog.visible" :model-value="formDialog.data"
       @submit="onFormSubmit" @cancel="closeForm" />
+    <!-- 新增卡片 popup box -->
+    <UiModal v-model="addCardDialog.visible">
+      <div style="min-width:260px;max-width:380px;display:flex;flex-direction:column;gap:16px;">
+        <h3 style="margin:0 0 8px 0;font-size:1.2em;font-weight:600;">新增卡片</h3>
+        <input v-model="addCardDialog.title" placeholder="請輸入卡片標題" style="padding:8px 10px;border-radius:6px;border:1.5px solid #e3f0fd;font-size:1em;outline:none;" @keyup.enter="submitAddCard" />
+        <textarea v-model="addCardDialog.description" placeholder="描述 (選填)" style="padding:8px 10px;border-radius:6px;border:1.5px solid #e3f0fd;font-size:1em;min-height:60px;resize:vertical;"></textarea>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <label style="font-size:0.98em;">日期</label>
+          <input v-model="addCardDialog.date" type="date" style="padding:6px 10px;border-radius:6px;border:1.5px solid #e3f0fd;font-size:1em;" />
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <label style="font-size:0.98em;">上傳圖片</label>
+          <input type="file" multiple accept="image/*" @change="handleImageUpload" />
+          <div v-if="addCardDialog.images.length" style="display:flex;flex-wrap:wrap;gap:8px;">
+            <div v-for="(img, idx) in addCardDialog.images" :key="img.url" style="position:relative;display:inline-block;">
+              <img :src="img.url" :alt="img.name" style="width:56px;height:56px;object-fit:cover;border-radius:6px;border:1px solid #e3e3e3;" />
+              <button @click="removeImage(idx)" style="position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid #e57373;color:#e53935;font-size:1em;border-radius:50%;width:22px;height:22px;line-height:18px;cursor:pointer;">×</button>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;justify-content:flex-end;">
+          <button type="button" class="primary" @click="submitAddCard">確定</button>
+          <button type="button" class="danger" @click="closeAddCardDialog">取消</button>
+        </div>
+      </div>
+    </UiModal>
   </div>
 </template>
 
@@ -57,6 +82,7 @@ import { useBoardStore } from '@/stores/board'
 import Card from '@/components/Card.vue'
 import CardDetail from '@/components/CardDetail.vue'
 import UiItemForm from '@/components/UiItemForm.vue'
+import UiModal from '@/components/UiModal.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Draggable from 'vue3-draggable-next'
 
@@ -80,9 +106,63 @@ function onCardChange(list, evt) {
   }
 }
 
+// 新增卡片彈窗狀態
+const addCardDialog = reactive({
+  visible: false,
+  listId: null,
+  title: '',
+  description: '',
+  date: '',
+  images: []
+})
+
+function openAddCardDialog(listId) {
+  addCardDialog.visible = true
+  addCardDialog.listId = listId
+  addCardDialog.title = ''
+  addCardDialog.description = ''
+  addCardDialog.date = ''
+  addCardDialog.images = []
+}
+function closeAddCardDialog() {
+  addCardDialog.visible = false
+  addCardDialog.listId = null
+  addCardDialog.title = ''
+  addCardDialog.description = ''
+  addCardDialog.date = ''
+  addCardDialog.images = []
+}
+async function handleImageUpload(e) {
+  const files = Array.from(e.target.files)
+  // 轉 base64 預覽
+  addCardDialog.images = await Promise.all(files.map(file => {
+    return new Promise(resolve => {
+      const reader = new FileReader()
+      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })
+      reader.readAsDataURL(file)
+    })
+  }))
+}
+function removeImage(idx) {
+  addCardDialog.images.splice(idx, 1)
+}
+function submitAddCard() {
+  if (!addCardDialog.title) return
+  board.addCard(
+    addCardDialog.listId,
+    {
+      title: addCardDialog.title,
+      description: addCardDialog.description,
+      date: addCardDialog.date,
+      images: addCardDialog.images.map(img => img.url)
+    }
+  )
+  closeAddCardDialog()
+}
+
 function addList() {
   errorMsg.value = ''
-  if (!newListTitle.value.trim()) {
+  if (!newListTitle.value) {
     errorMsg.value = '清單名稱不能為空'
     return
   }
@@ -91,7 +171,7 @@ function addList() {
 }
 
 function deleteList(id) { board.deleteList(id) }
-function openForm(listId) { formDialog.listId = listId; formDialog.data = { title: '', description: '', date: null, images: [] }; formDialog.edit = false; formDialog.editId = null; formDialog.visible = true }
+function openForm(listId) { openAddCardDialog(listId) }
 function openEditForm(item, list) { formDialog.listId = list.id; formDialog.data = { ...item }; formDialog.edit = true; formDialog.editId = item.id; formDialog.visible = true }
 function onFormSubmit(data) { formDialog.edit && formDialog.editId ? board.updateItem(formDialog.listId, { ...data, id: formDialog.editId }) : board.addCard(formDialog.listId, data); closeForm() }
 function closeForm() { formDialog.visible = false; formDialog.data = {}; formDialog.edit = false; formDialog.editId = null }
@@ -247,6 +327,10 @@ input, textarea {
   background: #f9fbfd;
   &:focus {
     border-color: #90caf9;
+  }
+  &.small-input {
+    width: 100%;
+    max-width: 200px;
   }
 }
 

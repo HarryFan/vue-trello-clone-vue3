@@ -53,7 +53,7 @@ export const useBoardStore = defineStore('board', {
     },
     addList(title) {
       console.log('[Pinia] addList called, title:', title)
-      if (!title || !title.trim()) {
+      if (!title) {
         console.warn('[Pinia] 新增清單失敗：名稱為空')
         return
       }
@@ -65,22 +65,43 @@ export const useBoardStore = defineStore('board', {
       this.lists = this.lists.filter(l => l.id !== listId)
       this.persist()
     },
-    addCard(listId, title) {
-      console.log('[Pinia] addCard called, listId:', listId, 'title:', title)
-      if (!title || !title.trim()) {
-        console.warn('[Pinia] 新增卡片失敗：名稱為空')
-        return
-      }
-      const list = this.lists.find(l => l.id === listId)
-      if (list) {
-        list.items.push({
+    addCard(listId, cardData) {
+      console.log('[Pinia] addCard called, listId:', listId, 'cardData:', cardData)
+      let card
+      if (typeof cardData === 'string') {
+        if (!cardData) {
+          console.warn('[Pinia] 新增卡片失敗：名稱為空')
+          return
+        }
+        card = {
           id: Date.now(),
-          title,
+          title: cardData,
           description: '',
           subItems: [],
           images: [],
           createdAt: new Date().toISOString(),
-        })
+        }
+      } else if (typeof cardData === 'object' && cardData) {
+        // 嚴格檢查 cardData.title 型別，完全不呼叫 .trim()
+        if (typeof cardData.title !== 'string' || !cardData.title) {
+          console.warn('[Pinia] 新增卡片失敗：名稱為空或型別錯誤')
+          return
+        }
+        card = {
+          id: Date.now(),
+          ...cardData,
+          title: cardData.title,
+          createdAt: new Date().toISOString(),
+          subItems: Array.isArray(cardData.subItems) ? cardData.subItems : [],
+          images: Array.isArray(cardData.images) ? cardData.images : [],
+        }
+      } else {
+        console.warn('[Pinia] 新增卡片失敗：資料型別錯誤')
+        return
+      }
+      const list = this.lists.find(l => l.id === listId)
+      if (list) {
+        list.items.push(card)
         this.persist()
         console.log('[Pinia] 新增卡片成功，list:', list)
       } else {

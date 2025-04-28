@@ -45,7 +45,7 @@
             <span :class="{ completed: sub.isCompleted }">{{ sub.text }}</span>
           </div>
           <div class="subitem-add">
-            <input v-model="newSubItemText" @keyup.enter="addSubItem" placeholder="新增細項..." size="small" />
+            <input v-model="newSubItemText" @keyup.enter="addSubItem" placeholder="新增細項..." class="small-input" />
             <button type="primary" size="small" @click="addSubItem" :disabled="!newSubItemText.trim()">新增</button>
           </div>
         </div>
@@ -243,6 +243,14 @@ function addSubItem() {
   display: flex;
   gap: 6px;
   margin-top: 6px;
+}
+.small-input {
+  width: 100%;
+  height: 30px;
+  font-size: 1em;
+  padding: 6px;
+  border: 1px solid #b6d4ff;
+  border-radius: 4px;
 }
 .modal-overlay {
   position: fixed;
