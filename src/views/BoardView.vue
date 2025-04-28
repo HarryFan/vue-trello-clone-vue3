@@ -2,7 +2,7 @@
   <div class="board-view">
     <div class="board-header">
       <h2>任務清單</h2>
-      <button type="button" class="warning" @click="resetLists" style="float:right; margin-left:8px;">
+      <button type="button" class="warning" @click="resetLists">
         <font-awesome-icon :icon="['fas','rotate-right']" />重設清單
       </button>
     </div>
@@ -32,11 +32,14 @@
             </section>
           </template>
         </Draggable>
-      </div>
-      <div class="new-list">
-        <input v-model="newListTitle" placeholder="新增清單" size="small" @keyup.enter="addList" />
-        <button type="button" class="primary" @click="addList">新增清單</button>
-        <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
+        <!-- 新增清單表單永遠在最右側，明顯區隔 -->
+        <section class="new-list-column">
+          <div class="new-list-inner">
+            <input v-model="newListTitle" placeholder="新增清單" size="small" @keyup.enter="addList" />
+            <button type="button" class="primary" @click="addList">新增清單</button>
+            <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
+          </div>
+        </section>
       </div>
     </div>
 
@@ -103,56 +106,61 @@ const detailDialog = reactive({ visible: false, item: {}, listTitle: '' })
 const formDialog = reactive({ visible: false, listId: null, data: {}, edit: false, editId: null })
 </script>
 
-<style scoped>
-.lists-wrapper > div{
-  display: flex;
-  flex-direction: row;
-  gap: 24px;
-  align-items: flex-start;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  width: 70vw;
-
-  box-sizing: border-box;
-
-  justify-content: flex-start;
-}
-@media (max-width: 800px) {
-  .lists-wrapper > div {
-    width: 100%;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-}
+<style lang="scss" scoped>
 .board-view {
-  width: 100vw;
-  max-width: 100vw;
-  margin: 0;
-  padding: 0 0 24px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 0 32px 0;
+  min-height: 100vh;
+  box-sizing: border-box;
   background: #f5f8fb;
 }
-.lists-container {
+
+.board-header {
   display: flex;
   flex-direction: row;
-  gap: 24px;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 8px auto;
+  padding: 0 0 0 0;
+  box-sizing: border-box;
+  background: transparent;
+  min-height: 56px;
+  h2 {
+    margin: 0;
+    font-size: 1.6em;
+    font-weight: 600;
+  }
+  button.warning {
+    margin-left: 12px;
+    flex-shrink: 0;
+  }
+}
+
+.lists-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 0 0 32px 0;
+  overflow-x: auto;
+}
+
+.lists-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
   align-items: flex-start;
   flex-wrap: nowrap;
   overflow-x: auto;
-  width: 100vw;
-  min-width: 100vw;
+  width: 100%;
   box-sizing: border-box;
-  padding: 24px 0 32px 0;
   justify-content: flex-start;
 }
-.list-column .list-header{
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-.list-column,
-.new-list {
+
+.list-column {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px #1976d21a, 0 1.5px 4px #b6d4ff33;
@@ -167,44 +175,45 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
   flex-direction: column;
   gap: 8px;
   align-self: flex-start;
-}
-.cards-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.item-entry  {
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-}
-.list-column:hover {
-  box-shadow: 0 4px 16px #1976d233, 0 2px 8px #b6d4ff44;
-  transform: translateY(-2px) scale(1.02);
-  border-color: #90caf9;
-}
-@media (max-width: 800px) {
-  .lists-container {
-    flex-direction: column;
-    align-items: stretch;
-    overflow-x: unset;
-    gap: 16px;
-    width: 100%;
-    min-width: 0;
-  }
-  .list-column,
-  .new-list {
+  @media (max-width: 800px) {
     width: 100%;
     min-width: 0;
     margin-bottom: 10px;
     flex-shrink: 1;
   }
-  .board-view {
-    width: 100%;
-    max-width: 100%;
-    padding: 0 0 16px 0;
-  }
 }
+
+.new-list-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  min-width: 180px;
+  max-width: 220px;
+  padding: 24px 10px 18px 10px;
+  margin-bottom: 12px;
+  background: #f9fbfd;
+  border: 2px dashed #90caf9;
+  border-radius: 12px;
+  opacity: 0.92;
+  box-shadow: 0 1.5px 6px #90caf933;
+  transition: background 0.2s, border-color 0.2s;
+  align-self: flex-start;
+  flex-shrink: 0;
+}
+
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item-entry {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
 input, textarea {
   border: 1.5px solid #e3f0fd;
   border-radius: 6px;
@@ -213,42 +222,45 @@ input, textarea {
   outline: none;
   transition: border-color 0.2s;
   background: #f9fbfd;
+  &:focus {
+    border-color: #90caf9;
+  }
 }
-input:focus, textarea:focus {
-  border-color: #90caf9;
-}
-button.warning {
-  background-color: #ffc107;
-  color: #fff;
-  border: none;
-  padding: 7px 16px;
-  font-size: 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  box-shadow: 0 1px 3px #ffd60033;
-}
-button.danger {
-  background-color: #e53935;
-  color: #fff;
-  border: none;
-  padding: 6px 12px;
-  font-size: 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  box-shadow: 0 1px 3px #e5737333;
-}
-button.primary {
-  background-color: #2196f3;
-  color: #fff;
-  border: none;
-  padding: 7px 18px;
-  font-size: 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  box-shadow: 0 1px 3px #1976d233;
-  transition: background 0.15s, box-shadow 0.15s;
-}
-button.primary:hover {
-  background-color: #1565c0;
+
+button {
+  &.warning {
+    background-color: #ffc107;
+    color: #fff;
+    border: none;
+    padding: 7px 16px;
+    font-size: 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px #ffd60033;
+  }
+  &.danger {
+    background-color: #e53935;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px #e5737333;
+  }
+  &.primary {
+    background-color: #2196f3;
+    color: #fff;
+    border: none;
+    padding: 7px 18px;
+    font-size: 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px #1976d233;
+    transition: background 0.15s, box-shadow 0.15s;
+    &:hover {
+      background-color: #1565c0;
+    }
+  }
 }
 </style>
