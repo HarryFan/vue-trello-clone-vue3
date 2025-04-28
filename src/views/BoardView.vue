@@ -42,12 +42,9 @@
       </div>
     </div>
 
-    <CardDetail v-if="detailDialog.visible" v-model="detailDialog.visible"
-      :item="detailDialog.item" :list-title="detailDialog.listTitle"
-      @update="onDetailUpdate" @close="closeDetail" />
-    <UiItemForm v-if="formDialog.visible" :model-value="formDialog.data"
-      @submit="onFormSubmit" @cancel="closeForm" />
-    <!-- 新增卡片 popup box -->
+    <UiModal v-model="formDialog.visible">
+      <UiItemForm :model-value="formDialog.data" @submit="onFormSubmit" @cancel="closeForm" />
+    </UiModal>
     <UiModal v-model="addCardDialog.visible">
       <div style="min-width:260px;max-width:380px;display:flex;flex-direction:column;gap:16px;">
         <h3 style="margin:0 0 8px 0;font-size:1.2em;font-weight:600;">新增卡片</h3>
@@ -80,7 +77,6 @@
 import { ref, reactive, computed } from 'vue'
 import { useBoardStore } from '@/stores/board'
 import Card from '@/components/Card.vue'
-import CardDetail from '@/components/CardDetail.vue'
 import UiItemForm from '@/components/UiItemForm.vue'
 import UiModal from '@/components/UiModal.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -187,7 +183,7 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
 </script>
 
 <style lang="scss" scoped>
-.list-header{
+.list-header{margin: 0 0 1rem 0;
   display: flex;justify-content: space-between;
   ;
 
@@ -203,6 +199,7 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
 }
 
 .board-header {
+
   position: relative;
   display: flex;
   flex-direction: row;
@@ -211,7 +208,7 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
   width: 100%;
   max-width: 1200px;
   margin: 0 auto 8px auto;
-  padding: 0 0 0 0;
+    padding: 0 1rem 0 1rem;
   box-sizing: border-box;
   background: transparent;
   min-height: 56px;
@@ -228,13 +225,16 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
     flex-shrink: 0;
   }
 }
+.subtitle{
+  padding: 0 1rem 0 1rem;
+}
 
 .lists-container {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   box-sizing: border-box;
-  padding: 0 0 32px 0;
+  padding: 0 1rem 32px 1rem;
   overflow-x: auto;
 }
 
@@ -268,6 +268,8 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
     border-radius: 12px;
     box-shadow: 0 1.5px 8px rgba(33,150,243,0.10);
     padding: 10px 6px 16px 6px;
+    box-sizing: border-box;
+    overflow-x: unset;
   }
 }
 
@@ -301,13 +303,22 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
   .lists-wrapper {
     white-space: normal;
     padding-bottom: 0;
+    overflow-x: unset;
+    width: 100%;
   }
   .list-column, .new-list-column {
     display: block;
     width: 100%;
+    min-width: 0;
     margin: 12px 0 18px 0;
+    border-radius: 12px;
+    box-shadow: 0 1.5px 8px rgba(33,150,243,0.10);
+    padding: 10px 6px 16px 6px;
+    box-sizing: border-box;
+    overflow-x: unset;
   }
   .board-header {
+
     flex-direction: column;
     align-items: flex-start;
     button.warning {

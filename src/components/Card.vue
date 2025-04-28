@@ -14,6 +14,9 @@
         <font-awesome-icon :icon="['fas','trash']" />
       </span>
     </div>
+    <div v-if="item.images && item.images.length" class="card-images">
+      <img v-for="(img, idx) in item.images" :key="idx" :src="img" class="card-image-thumb" alt="卡片圖片" />
+    </div>
     <div>
       <p class="item-title">{{ item.title || item.text }}</p>
       <p class="item-description" v-if="item.description">{{ item.description }}</p>
@@ -114,6 +117,58 @@ function toggleSubItem(idx) {
   transform: translateY(-2px) scale(1.02);
   border-color: #90caf9;
 }
+.card-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.card-image-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 5px;
+  border: 1px solid #e3e3e3;
+}
+@media (max-width: 600px) {
+  .card {
+    padding: 10px 6px 8px 6px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    box-shadow: 0 1.5px 8px rgba(33,150,243,0.10);
+  }
+  .card-images {
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  .card-image-thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+  }
+  .item-title {
+    font-size: 1em;
+    margin-bottom: 4px;
+  }
+  .item-description {
+    font-size: 0.85em;
+    margin-bottom: 2px;
+  }
+  .item-timestamp {
+    font-size: 0.68em;
+    margin-top: 2px;
+  }
+  .icons {
+    top: 7px;
+    right: 7px;
+    gap: 0.3em;
+  }
+  .icon-edit, .icon-delete {
+    width: 20px;
+    height: 20px;
+    font-size: 1em;
+  }
+}
 .item-title {
   font-weight: bold;
   font-size: 1.13em;
@@ -193,17 +248,5 @@ function toggleSubItem(idx) {
 .completed {
   text-decoration: line-through;
   color: #bbb;
-}
-@media (max-width: 600px) {
-  .icons {
-    top: 7px;
-    right: 7px;
-    gap: 0.3em;
-  }
-  .icon-edit, .icon-delete {
-    width: 20px;
-    height: 20px;
-    font-size: 1em;
-  }
 }
 </style>
