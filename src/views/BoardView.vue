@@ -51,6 +51,7 @@
       <div class="popup-box-wide">
         <h3 style="margin:0 0 8px 0;font-size:1.2em;font-weight:600;">新增卡片</h3>
         <input v-model="addCardDialog.title" placeholder="請輸入卡片標題" style="padding:8px 10px;border-radius:6px;border:1.5px solid #e3f0fd;font-size:1em;outline:none;" @keyup.enter="submitAddCard" />
+        <div v-if="addCardDialog.errors.title" class="input-error-text">{{ addCardDialog.errors.title }}</div>
         <textarea v-model="addCardDialog.description" placeholder="描述 (選填)" style="padding:8px 10px;border-radius:6px;border:1.5px solid #e3f0fd;font-size:1em;min-height:60px;resize:vertical;"></textarea>
         <div style="display:flex;align-items:center;gap:8px;">
           <label style="font-size:0.98em;">日期</label>
@@ -111,8 +112,35 @@ const addCardDialog = reactive({
   title: '',
   description: '',
   date: '',
-  images: []
+  images: [],
+  errors: {}
 })
+
+function validateAddCard() {
+  const errors = {}
+  if (!addCardDialog.title) {
+    errors.title = '卡片標題不能為空'
+  } else if (addCardDialog.title.length > 40) {
+    errors.title = '標題長度不能超過 40 字'
+  }
+  // 其他欄位驗證可依需求擴充
+  addCardDialog.errors = errors
+  return Object.keys(errors).length === 0
+}
+
+function submitAddCard() {
+  if (!validateAddCard()) return
+  board.addCard(
+    addCardDialog.listId,
+    {
+      title: addCardDialog.title,
+      description: addCardDialog.description,
+      date: addCardDialog.date,
+      images: addCardDialog.images.map(img => img.url)
+    }
+  )
+  closeAddCardDialog()
+}
 
 function openAddCardDialog(listId) {
   addCardDialog.visible = true
@@ -121,6 +149,7 @@ function openAddCardDialog(listId) {
   addCardDialog.description = ''
   addCardDialog.date = ''
   addCardDialog.images = []
+  addCardDialog.errors = {}
 }
 function closeAddCardDialog() {
   addCardDialog.visible = false
@@ -129,6 +158,7 @@ function closeAddCardDialog() {
   addCardDialog.description = ''
   addCardDialog.date = ''
   addCardDialog.images = []
+  addCardDialog.errors = {}
 }
 async function handleImageUpload(e) {
   const files = Array.from(e.target.files)
@@ -143,19 +173,6 @@ async function handleImageUpload(e) {
 }
 function removeImage(idx) {
   addCardDialog.images.splice(idx, 1)
-}
-function submitAddCard() {
-  if (!addCardDialog.title) return
-  board.addCard(
-    addCardDialog.listId,
-    {
-      title: addCardDialog.title,
-      description: addCardDialog.description,
-      date: addCardDialog.date,
-      images: addCardDialog.images.map(img => img.url)
-    }
-  )
-  closeAddCardDialog()
 }
 
 function addList() {
@@ -399,5 +416,13 @@ button {
     max-width: 98vw;
     padding: 0 4vw;
   }
+}
+
+.input-error-text {
+  color: #e53935;
+  font-size: 0.92em;
+  margin-top: 2px;
+  margin-bottom: 6px;
+  padding-left: 2px;
 }
 </style>

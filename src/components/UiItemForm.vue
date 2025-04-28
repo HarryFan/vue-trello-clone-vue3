@@ -9,7 +9,7 @@
       <textarea v-model="form.description" placeholder="請輸入描述"></textarea>
     </div>
     <div class="form-group">
-      <label>日期</label>
+      <label>任務截止日期</label>
       <input type="date" v-model="form.date" />
     </div>
     <div class="form-group">
