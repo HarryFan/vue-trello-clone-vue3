@@ -2,39 +2,40 @@
   <div class="board-view">
     <div class="board-header">
       <h2>任務清單</h2>
-      <el-button type="warning" size="small" @click="resetLists" style="float:right; margin-left:8px;">
+      <button type="button" class="warning" @click="resetLists" style="float:right; margin-left:8px;">
         <font-awesome-icon :icon="['fas','rotate-right']" />重設清單
-      </el-button>
+      </button>
     </div>
     <p class="subtitle">請在輸入框新增清單與卡片。</p>
 
     <div class="lists-container">
-      <!-- 使用 vuedraggable@next 實現 Trello 風格拖曳 -->
-      <Draggable :list="lists" group="lists" item-key="id" animation="150" ghost-class="drag-ghost" @change="onListChange">
-        <template #item="{element: list, index: listIndex}">
-          <section class="list-container" :data-id="list.id">
-            <div class="list-header">
-              <span class="list-drag-handle">☰</span>
-              <span class="list-title">{{ list.title }}</span>
-              <el-button type="danger" size="small" circle @click="deleteList(list.id)"><font-awesome-icon :icon="['fas','trash']"/></el-button>
-            </div>
-            <Draggable :list="list.items" group="cards" item-key="id" animation="150" ghost-class="drag-ghost" @change="evt => onCardChange(evt, list)">
-              <template #item="{element: item, index: itemIndex}">
-                <div class="draggable-item">
-                  <Card :item="item" :list-title="list.title" @edit="openEditForm(item,list)" @delete="deleteItem(list.id,item.id)" @update="updateItem(list.id, $event)" />
-                </div>
-              </template>
-            </Draggable>
-            <div class="item-entry">
-              <el-input v-model="newCardText[list.id]" placeholder="新增卡片" size="small" @keyup.enter="openForm(list.id)" />
-              <el-button type="primary" size="small" @click="openForm(list.id)">新增</el-button>
-            </div>
-          </section>
-        </template>
-      </Draggable>
+      <div class="lists-wrapper">
+        <Draggable :list="lists" group="lists" item-key="id" animation="150" ghost-class="drag-ghost" @change="onListChange">
+          <template #item="{element: list, index: listIndex}">
+            <section class="list-column" :data-id="list.id">
+              <div class="list-header">
+                <span class="list-drag-handle">☰</span>
+                <span class="list-title">{{ list.title }}</span>
+                <button type="button" class="danger" @click="deleteList(list.id)"><font-awesome-icon :icon="['fas','trash']"/></button>
+              </div>
+              <div class="cards-container">
+                <Draggable :list="list.items" group="cards" item-key="id" animation="120" ghost-class="drag-ghost" @change="onCardChange(list, $event)">
+                  <template #item="{element: item, index: cardIndex}">
+                    <Card :item="item" :list-title="list.title" @edit="openEditForm(item,list)" @delete="deleteItem(list.id,item.id)" @update="updateItem(list.id, $event)" />
+                  </template>
+                </Draggable>
+              </div>
+              <div class="item-entry">
+                <input v-model="newCardText[list.id]" placeholder="新增卡片" size="small" @keyup.enter="openForm(list.id)" />
+                <button type="button" class="primary" @click="openForm(list.id)">新增</button>
+              </div>
+            </section>
+          </template>
+        </Draggable>
+      </div>
       <div class="new-list">
-        <el-input v-model="newListTitle" placeholder="新增清單" size="small" @keyup.enter="addList" />
-        <el-button type="primary" size="small" @click="addList">新增清單</el-button>
+        <input v-model="newListTitle" placeholder="新增清單" size="small" @keyup.enter="addList" />
+        <button type="button" class="primary" @click="addList">新增清單</button>
         <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
       </div>
     </div>
@@ -54,8 +55,7 @@ import Card from '@/components/Card.vue'
 import CardDetail from '@/components/CardDetail.vue'
 import UiItemForm from '@/components/UiItemForm.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { ElMessage } from 'element-plus'
-import Draggable from 'vuedraggable'
+import Draggable from 'vue3-draggable-next'
 
 const board = useBoardStore()
 const lists = computed(() => board.lists)
@@ -63,14 +63,14 @@ const newListTitle = ref('')
 const newCardText = ref({})
 const errorMsg = ref('')
 
-// 處理清單拖移 (vuedraggable)
+// 處理清單拖移 (vue3-draggable-next)
 function onListChange(evt) {
   const { moved } = evt
   if (moved) board.moveList(moved.oldIndex, moved.newIndex)
 }
 
-// 處理卡片拖移 (vuedraggable)
-function onCardChange(evt, list) {
+// 處理卡片拖移 (vue3-draggable-next)
+function onCardChange(list, evt) {
   const { added, removed } = evt
   if (removed && added) {
     board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)
@@ -97,21 +97,158 @@ function updateItem(listId, item) { board.updateItem(listId, item) }
 function openDetail(item, list) { detailDialog.item = { ...item }; detailDialog.listTitle = list.title; detailDialog.visible = true }
 function closeDetail() { detailDialog.visible = false }
 function onDetailUpdate(item) { board.updateItemByTitle(detailDialog.listTitle, item) }
-function resetLists() { board.resetDefaultLists(); ElMessage.success('已重設預設清單') }
+function resetLists() { board.resetDefaultLists(); alert('已重設預設清單') }
 
 const detailDialog = reactive({ visible: false, item: {}, listTitle: '' })
 const formDialog = reactive({ visible: false, listId: null, data: {}, edit: false, editId: null })
 </script>
 
 <style scoped>
-.board-view{padding:12px}
-.subtitle{color:#1976d2;margin-bottom:12px}
-.lists-container{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
-.list-container{background:#f2f7fb;padding:14px;border-radius:6px;min-width:260px;max-width:320px}
-.list-header{font-weight:bold;margin-bottom:8px;display:flex;justify-content:space-between}
-.card-list{min-height:20px;margin-bottom:8px}
-.draggable-item{margin-bottom:8px}
-.item-entry{display:flex;gap:6px;margin-top:8px}
-.new-list{display:flex;flex-direction:column;gap:6px;min-width:220px;max-width:260px}
-.error-msg{color:#e53935;font-size:13px;margin-top:4px}
+.lists-wrapper > div{
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  width: 70vw;
+
+  box-sizing: border-box;
+
+  justify-content: flex-start;
+}
+@media (max-width: 800px) {
+  .lists-wrapper > div {
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+.board-view {
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0;
+  padding: 0 0 24px 0;
+  background: #f5f8fb;
+}
+.lists-container {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  width: 100vw;
+  min-width: 100vw;
+  box-sizing: border-box;
+  padding: 24px 0 32px 0;
+  justify-content: flex-start;
+}
+.list-column .list-header{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.list-column,
+.new-list {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #1976d21a, 0 1.5px 4px #b6d4ff33;
+  width: 320px;
+  min-width: 260px;
+  margin-bottom: 12px;
+  padding: 18px 14px 12px 14px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: 1.5px solid #e3f0fd;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-self: flex-start;
+}
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.item-entry  {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+.list-column:hover {
+  box-shadow: 0 4px 16px #1976d233, 0 2px 8px #b6d4ff44;
+  transform: translateY(-2px) scale(1.02);
+  border-color: #90caf9;
+}
+@media (max-width: 800px) {
+  .lists-container {
+    flex-direction: column;
+    align-items: stretch;
+    overflow-x: unset;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+  }
+  .list-column,
+  .new-list {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 10px;
+    flex-shrink: 1;
+  }
+  .board-view {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 0 16px 0;
+  }
+}
+input, textarea {
+  border: 1.5px solid #e3f0fd;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #f9fbfd;
+}
+input:focus, textarea:focus {
+  border-color: #90caf9;
+}
+button.warning {
+  background-color: #ffc107;
+  color: #fff;
+  border: none;
+  padding: 7px 16px;
+  font-size: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px #ffd60033;
+}
+button.danger {
+  background-color: #e53935;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px #e5737333;
+}
+button.primary {
+  background-color: #2196f3;
+  color: #fff;
+  border: none;
+  padding: 7px 18px;
+  font-size: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px #1976d233;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+button.primary:hover {
+  background-color: #1565c0;
+}
 </style>
