@@ -1,6 +1,9 @@
 # Vue Trello Clone (Vue 3 + Vite)
 
-本專案為 Vue 2 Trello 任務管理板的 Vue 3 + Vite 全新重構版，UI 採用 Element Plus，狀態管理改用 Pinia，所有資料皆支援 localStorage 持久化。
+本專案為 Vue 2 Trello 任務管理板的 Vue 3 + Vite 全新重構版，UI 為自訂 UI 元素，狀態管理改用 Pinia，所有資料皆支援 localStorage 持久化。
+
+> 本專案最終能實現 Trello 風格的拖曳排序（Drag and Drop），關鍵在於未採用 Element Plus 官方 UI 排版元件，而是改用客製化 UI 元素與自訂元件結構，確保
+> vue3-dnd、vue3-draggable-next 等拖曳套件能無縫整合、互動順暢。此設計大幅提升拖曳體驗與兼容性。
 
 ---
 
@@ -63,7 +66,6 @@ npm run dev
 
 ## 參考資源
 
-- [Element Plus 官方元件](https://element-plus.org/en-US/component/overview.html)
 - [Font Awesome 圖示](https://fontawesome.com/icons/)
 - [vue3-dnd 拖曳](https://www.vue3-dnd.com/guide/)
 
