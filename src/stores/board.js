@@ -158,7 +158,7 @@ export const useBoardStore = defineStore('board', {
         console.warn('[Pinia] 新增卡片失敗：資料型別錯誤')
         return
       }
-      const list = this.lists.find(l => l.id === listId)
+      const list = this.lists.find(l => l.id === listId)// 找到目標清單
       if (list) {
         list.items.push(card)
         this.persist()
