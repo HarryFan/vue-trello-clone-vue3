@@ -111,10 +111,42 @@
 
 ---
 
-## 資料表設計建議（可選）
-- boards（id, title, ...）
-- lists（id, board_id, title, ...）
-- cards（id, list_id, title, description, order, ...）
+## 資料表設計建議（MySQL 範例）
+
+### boards
+| 欄位        | 型別         | 屬性           | 說明        |
+|-------------|--------------|----------------|-------------|
+| id          | INT          | PK, AUTO_INCREMENT | 主鍵        |
+| title       | VARCHAR(255) | NOT NULL       | 看板名稱    |
+| created_at  | DATETIME     | DEFAULT CURRENT_TIMESTAMP | 建立時間 |
+| updated_at  | DATETIME     | ON UPDATE CURRENT_TIMESTAMP | 更新時間 |
+
+### lists
+| 欄位        | 型別         | 屬性           | 說明        |
+|-------------|--------------|----------------|-------------|
+| id          | INT          | PK, AUTO_INCREMENT | 主鍵        |
+| board_id    | INT          | FK             | 所屬看板 id  |
+| title       | VARCHAR(255) | NOT NULL       | 清單名稱    |
+| position    | INT          |                | 排序用      |
+| created_at  | DATETIME     | DEFAULT CURRENT_TIMESTAMP | 建立時間 |
+| updated_at  | DATETIME     | ON UPDATE CURRENT_TIMESTAMP | 更新時間 |
+
+### cards
+| 欄位        | 型別         | 屬性           | 說明        |
+|-------------|--------------|----------------|-------------|
+| id          | INT          | PK, AUTO_INCREMENT | 主鍵        |
+| list_id     | INT          | FK             | 所屬清單 id  |
+| title       | VARCHAR(255) | NOT NULL       | 卡片標題    |
+| description | TEXT         |                | 卡片描述    |
+| `order`     | INT          |                | 排序用      |
+| created_at  | DATETIME     | DEFAULT CURRENT_TIMESTAMP | 建立時間 |
+| updated_at  | DATETIME     | ON UPDATE CURRENT_TIMESTAMP | 更新時間 |
+
+#### 補充說明
+- `FK` = 外鍵，建議加上外鍵約束。
+- `position`/`order` 欄位用於前端拖曳排序。
+- 可依需求增加 `user_id`、權限等欄位。
+- 欄位名稱、型別與前端結構需保持一致。
 
 ---
 
