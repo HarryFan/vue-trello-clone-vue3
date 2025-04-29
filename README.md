@@ -48,6 +48,93 @@ npm run dev
 
 ---
 
+## 部署資料夾命名建議
+
+部署到 Bluehost 時，請將專案資料夾命名如下，方便協作與維護：
+
+```
+public_html/
+  ├── backend/    # CodeIgniter 3 API 專案（原 codeigniter-trello-api）
+  └── frontend/   # React/Vue 前端專案（build 後靜態檔案）
+```
+
+- `backend/`：放置 API 與 PHP 程式。
+- `frontend/`：放置 React/Vue build 後的靜態網頁。
+- 前端 `.env.production` 的 API 路徑請設為 `/backend/`。
+- 上傳到 Bluehost 時，將原本的專案資料夾重新命名即可，不影響程式內容運作。
+
+此命名方式有助於團隊協作、維護與路徑辨識，建議所有協作者遵循。
+
+---
+
+## 部署到 Bluehost 實用教學
+
+### 1. CodeIgniter 3 API 專案部署（PHP/MySQL）
+
+1. **確認 Bluehost 支援 PHP 7.x（或相容版本）**
+   - 登入 Bluehost 控制台，檢查 PHP 版本（建議 PHP 7.3~7.4）。
+
+2. **上傳專案檔案**
+   - 將 `codeigniter-trello-api` 專案所有檔案（包含 `application`、`system`、`index.php`、`database.sql` 等）上傳到 Bluehost 的 `public_html/trello-api/` 目錄（可自訂子資料夾）。
+
+3. **設定資料庫**
+   - 在 Bluehost 後台建立 MySQL 資料庫與帳號。
+   - 匯入 `database.sql`（用 phpMyAdmin 或 Bluehost 提供的匯入工具）。
+
+4. **設定連線資訊**
+   - 編輯 `application/config/database.php`，填入你的 MySQL 資料庫名稱、帳號、密碼。
+
+5. **調整 index.php 路徑**
+   - 若放在子目錄，需確認 `index.php` 內的 `$system_path`、`$application_folder` 設定正確。
+   - 例：`$application_folder = 'application';`
+
+6. **設定 .htaccess（可選）**
+   - 讓網址不帶 `index.php`，在 `public_html/trello-api/` 建立 `.htaccess`：
+     ```
+     RewriteEngine on
+     RewriteCond %{REQUEST_FILENAME} !-f
+     RewriteCond %{REQUEST_FILENAME} !-d
+     RewriteRule ^(.*)$ index.php/$1 [L]
+     ```
+
+7. **測試 API**
+   - 用 Postman 或瀏覽器測試 `https://你的網域/trello-api/api/boards` 等 API 路徑。
+
+### 2. Vue3 前端專案部署（靜態網頁）
+
+1. **打包前端專案**
+   - 在本機專案目錄執行：
+     ```
+     npm run build
+     ```
+   - 產生 `dist/` 目錄（Vite 預設）。
+
+2. **上傳靜態檔案**
+   - 將 `dist/` 內所有檔案，上傳到 Bluehost 的 `public_html/` 或你想要的子資料夾（如 `public_html/trello/`）。
+
+3. **API 連線設定**
+   - 確認 `.env.production` 內的 `VITE_API_BASE_URL` 指向你的 API 路徑，例如：
+     ```
+     VITE_API_BASE_URL=https://你的網域/trello-api/
+     ```
+   - 若前端與 API 不同子目錄，請確保 CORS 設定允許跨域（CI3 預設允許 GET/POST，必要時可加 CORS header）。
+
+4. **測試前端網站**
+   - 直接瀏覽 `https://你的網域/` 或 `https://你的網域/trello/`，確認能正常呼叫 API。
+
+### 3. 常見問題與建議
+
+- **API 路徑建議**：API 放在 `/trello-api/`，靜態前端放根目錄或 `/trello/`，可避免路徑衝突。
+- **安全建議**：資料庫帳密請勿公開，建議設定目錄權限。
+- **CORS 問題**：如遇跨域問題，可在 CI3 Controller 加上：
+  ```php
+  header('Access-Control-Allow-Origin: *');
+  header('Access-Control-Allow-Headers: Authorization, Content-Type');
+  ```
+- **SEO**：靜態前端可直接用 Bluehost 靜態空間，無需 Node.js server。
+
+---
+
 ## 技術棧與設計原則
 
 - 前端框架：Vue 3 (`vue@^3.5.13`)
