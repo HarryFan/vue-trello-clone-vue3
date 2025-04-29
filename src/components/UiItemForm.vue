@@ -10,7 +10,7 @@
     </div>
     <div class="form-group">
       <label>任務截止日期</label>
-      <input type="date" v-model="form.date" />
+      <input type="date" v-model="form.deadline" />
     </div>
     <div class="form-group">
       <label>圖片</label>
@@ -42,11 +42,11 @@ const form = reactive({
   id: null,
   title: '',
   description: '',
-  date: null,
+  deadline: null,
   images: []
 })
 watch(() => props.modelValue, (val) => {
-  Object.assign(form, val || { id: null, title: '', description: '', date: null, images: [] })
+  Object.assign(form, val || { id: null, title: '', description: '', deadline: null, images: [] })
 }, { immediate: true })
 
 function onSubmit() {
@@ -57,13 +57,13 @@ function onSubmit() {
   // 送出時帶入所有欄位
   emit('submit', {
     ...form,
-    date: form.date // 確保 date 一定帶出
+    deadline: form.deadline // 確保 deadline 一定帶出
   })
   resetForm()
 }
 function onCancel() { emit('cancel') }
 function resetForm() {
-  Object.assign(form, { id: null, title: '', description: '', date: null, images: [] })
+  Object.assign(form, { id: null, title: '', description: '', deadline: null, images: [] })
   errorMsg.value = ''
   nextTick(() => formRef.value?.clearValidate?.())
 }

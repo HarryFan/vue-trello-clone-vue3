@@ -9,6 +9,8 @@
 
 ## 快速啟動
 
+> **請使用 Node.js 18 以上版本**
+
 ```bash
 npm install
 npm run dev
@@ -74,7 +76,7 @@ npm run dev
 ## 聯絡方式
 
 - Email: harry750110@gmail.com
-- LinkedIn: [范綱栓](https://www.linkedin.com/in/%E7%B6%B1%E6%A0%93-%E8%8C%83-810868219/)
+- LinkedIn: [范綱栓](https://www.linkedin.com/in/%E7%B6%B1%E6%A0%93-%E8%8C%AF-810868219/)
 
 ---
 
