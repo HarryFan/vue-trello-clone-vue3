@@ -68,6 +68,15 @@ export function deleteCard(id) {
   return api.delete(`cards/${id}`)
 }
 
+// 健康檢查
+/**
+ * 呼叫後端 API 健康檢查
+ * @returns {Promise}
+ */
+export function healthCheck() {
+  return api.get('api')
+}
+
 export default {
   getBoards,
   getBoard,
@@ -84,4 +93,5 @@ export default {
   createCard,
   updateCard,
   deleteCard,
+  healthCheck,
 }

@@ -3,6 +3,15 @@
 </template>
 
 <script setup>
+import { healthCheck } from '@/services/apiService'
+
+healthCheck()
+  .then(res => {
+    console.log(res.data) // 應顯示 { status: 'ok', message: 'API service 運作正常' }
+  })
+  .catch(err => {
+    console.error('API 連線失敗', err)
+  })
 </script>
 
 <style>

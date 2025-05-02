@@ -1,9 +1,59 @@
 # Vue Trello Clone (Vue 3 + Vite)
 
+## Trello Clone API 規格
+
+### 1. Boards（看板）
+- **建立看板**：
+  - `POST /boards`
+  - Body: `{ "title": "新看板名稱", "user_id": 1 }`
+  - Response: `{ "id": 2, "title": "新看板名稱", "user_id": 1, ... }`
+- **取得所有看板**：
+  - `GET /boards?user_id=1`
+  - Response: `[ { "id": 2, "title": "新看板名稱", "user_id": 1, ... }, ... ]`
+
+### 2. Lists（清單）
+- **建立清單**：
+  - `POST /boards/{boardId}/lists`
+  - Body: `{ "title": "待辦", "position": 0 }`
+  - Response: `{ "id": 4, "board_id": 2, "title": "待辦", ... }`
+- **取得看板下所有清單**：
+  - `GET /boards/{boardId}/lists`
+  - Response: `[ { "id": 4, "board_id": 2, "title": "待辦", ... }, ... ]`
+
+### 3. Cards（卡片）
+- **建立卡片**：
+  - `POST /lists/{listId}/cards`
+  - Body: `{ "title": "卡片標題", "description": "卡片描述", "position": 0, "date": "2025-05-10", "images": ["base64..."] }`
+  - Response: `{ "id": 7, "list_id": 4, "title": "卡片標題", ... }`
+- **取得清單下所有卡片**：
+  - `GET /lists/{listId}/cards`
+  - Response: `[ { "id": 7, "list_id": 4, "title": "卡片標題", ... }, ... ]`
+
+### 4. 基本原則
+- 所有 id 由後端產生，前端必須用 API 回傳的 id。
+- 新增、查詢、刪除、更新皆回傳完整物件。
+- 欄位如需擴充，雙方討論後調整。
+
+---
+
+後端規格詳見 codeigniter-trello-api/README.md
+
 本專案為 Vue 2 Trello 任務管理板的 Vue 3 + Vite 全新重構版，UI 為自訂 UI 元素，狀態管理改用 Pinia，所有資料皆支援 localStorage 持久化。
 
 > 本專案最終能實現 Trello 風格的拖曳排序（Drag and Drop），關鍵在於未採用 Element Plus 官方 UI 排版元件，而是改用客製化 UI 元素與自訂元件結構，確保
 > vue3-dnd、vue3-draggable-next 等拖曳套件能無縫整合、互動順暢。此設計大幅提升拖曳體驗與兼容性。
+
+---
+
+## 開發環境 Node 版本
+- 本專案建議使用 Node.js 18.x（需符合 Vite 及相關依賴需求）
+- 切換方式建議使用 nvm：
+
+```bash
+nvm use 18
+```
+
+如遇 Vite 啟動錯誤，請確認 Node 版本是否正確。
 
 ---
 

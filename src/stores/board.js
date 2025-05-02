@@ -3,6 +3,7 @@
  * 使用Pinia管理看板的清單和卡片資料
  */
 import { defineStore } from 'pinia'
+import { createCard } from '@/services/apiService'
 
 /** 本地儲存的鍵名，用於保存看板資料 */
 const STORAGE_KEY = 'trello_lists_v3'
@@ -120,51 +121,26 @@ export const useBoardStore = defineStore('board', {
     },
 
     /**
-     * 新增卡片到指定清單
+     * 新增卡片到指定清單（已串接 API）
      * @param {number} listId - 目標清單ID
-     * @param {string|object} cardData - 卡片資料，可以是標題字串或完整卡片物件
+     * @param {object} cardData - 卡片資料
      */
-    addCard(listId, cardData) {
+    async addCard(listId, cardData) {
       console.log('[Pinia] addCard called, listId:', listId, 'cardData:', cardData)
-      let card
-      if (typeof cardData === 'string') {
-        if (!cardData) {
-          console.warn('[Pinia] 新增卡片失敗：名稱為空')
-          return
+      // API 串接
+      try {
+        const res = await createCard(listId, cardData)
+        const card = res.data?.data || res.data // 後端回傳卡片資料
+        const list = this.lists.find(l => l.id === listId)
+        if (list && card) {
+          list.items.push(card)
+          this.persist()
+          console.log('[Pinia] 新增卡片成功（API），list:', list)
+        } else {
+          console.warn('[Pinia] 新增卡片失敗：找不到清單或卡片資料', listId, card)
         }
-        card = {
-          id: Date.now(),
-          title: cardData,
-          description: '',
-          subItems: [],
-          images: [],
-          createdAt: new Date().toISOString(),
-        }
-      } else if (typeof cardData === 'object' && cardData) {
-        // 嚴格檢查 cardData.title 型別，完全不呼叫 .trim()
-        if (typeof cardData.title !== 'string' || !cardData.title) {
-          console.warn('[Pinia] 新增卡片失敗：名稱為空或型別錯誤')
-          return
-        }
-        card = {
-          id: Date.now(),
-          ...cardData,
-          title: cardData.title,
-          createdAt: new Date().toISOString(),
-          subItems: Array.isArray(cardData.subItems) ? cardData.subItems : [],
-          images: Array.isArray(cardData.images) ? cardData.images : [],
-        }
-      } else {
-        console.warn('[Pinia] 新增卡片失敗：資料型別錯誤')
-        return
-      }
-      const list = this.lists.find(l => l.id === listId)// 找到目標清單
-      if (list) {
-        list.items.push(card)
-        this.persist()
-        console.log('[Pinia] 新增卡片成功，list:', list)
-      } else {
-        console.warn('[Pinia] 新增卡片失敗：找不到清單', listId)
+      } catch (err) {
+        console.error('[Pinia] 新增卡片 API 失敗', err)
       }
     },
 
