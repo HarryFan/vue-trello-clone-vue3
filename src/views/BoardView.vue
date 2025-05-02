@@ -81,35 +81,61 @@
 // 1. 狀態與元件註冊
 // 2. 拖曳、表單、彈窗等互動行為
 // 3. 清單/卡片 CRUD 操作
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useBoardStore } from '@/stores/board'
 import Card from '@/components/Card.vue'
 import UiItemForm from '@/components/UiItemForm.vue'
 import UiModal from '@/components/UiModal.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Draggable from 'vue3-draggable-next'
-// Pinia 狀態管理，取得看板資料
-const board = useBoardStore() // 管理所有清單與卡片的資料
+
+// 假設目前僅支援單一預設看板，boardId 寫死為 1
+const boardId = 1
+const boardStore = useBoardStore()
+
 // 取得所有清單（reactive，拖曳時自動更新）
-const lists = computed(() => board.lists) // 清單陣列
+const lists = computed(() => boardStore.lists)
 // 新增清單的輸入框
-const newListTitle = ref('') // 新清單名稱
-// 新增卡片時暫存輸入內容
-const newCardText = ref({}) // 以清單 id 為 key，暫存每個清單的卡片內容
+const newListTitle = ref('')
 // 錯誤訊息顯示
-const errorMsg = ref('') // 表單錯誤訊息
+const errorMsg = ref('')
+
+// 初始化時自動 fetch lists from API
+onMounted(() => {
+  boardStore.fetchLists(boardId)
+})
+
+/**
+ * 新增清單（需傳入 boardId）
+ */
+async function addList() {
+  if (!newListTitle.value.trim()) {
+    errorMsg.value = '請輸入清單名稱'
+    return
+  }
+  errorMsg.value = ''
+  await boardStore.addList(boardId, newListTitle.value.trim())
+  newListTitle.value = ''
+}
+
+/**
+ * 刪除清單
+ */
+async function deleteList(listId) {
+  await boardStore.deleteList(listId)
+}
 
 // 處理清單拖移（拖曳清單排序）
 function onListChange(evt) {
   const { moved } = evt
-  if (moved) board.moveList(moved.oldIndex, moved.newIndex)
+  if (moved) boardStore.moveList(moved.oldIndex, moved.newIndex)
 }
 
 // 處理卡片拖移（卡片在清單間移動）
 function onCardChange(list, evt) {
   const { added, removed } = evt
   if (removed && added) {
-    board.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)
+    boardStore.moveItemAcrossLists(removed.element.listId, list.id, removed.oldIndex, added.newIndex)
   }
 }
 
@@ -139,7 +165,7 @@ function validateAddCard() {
 // 新增卡片：通過驗證才送出
 function submitAddCard() {
   if (!validateAddCard()) return
-  board.addCard(
+  boardStore.addCard(
     addCardDialog.listId,
     {
       title: addCardDialog.title,
@@ -187,39 +213,24 @@ function removeImage(idx) {
   addCardDialog.images.splice(idx, 1)
 }
 
-// 新增清單
-function addList() {
-  errorMsg.value = ''
-  if (!newListTitle.value) {
-    errorMsg.value = '清單名稱不能為空'
-    return
-  }
-  board.addList(newListTitle.value)
-  newListTitle.value = ''
-}
-
-// 刪除清單
-function deleteList(id) { board.deleteList(id) }
-// 開啟新增卡片表單
-function openForm(listId) { openAddCardDialog(listId) }
 // 編輯卡片表單
 function openEditForm(item, list) { formDialog.listId = list.id; formDialog.data = { ...item }; formDialog.edit = true; formDialog.editId = item.id; formDialog.visible = true }
 // 表單送出（新增或編輯卡片）
-function onFormSubmit(data) { formDialog.edit && formDialog.editId ? board.updateItem(formDialog.listId, { ...data, id: formDialog.editId }) : board.addCard(formDialog.listId, data); closeForm() }
+function onFormSubmit(data) { formDialog.edit && formDialog.editId ? boardStore.updateItem(formDialog.listId, { ...data, id: formDialog.editId }) : boardStore.addCard(formDialog.listId, data); closeForm() }
 // 關閉表單
 function closeForm() { formDialog.visible = false; formDialog.data = {}; formDialog.edit = false; formDialog.editId = null }
 // 刪除卡片
-function deleteItem(listId, itemId) { board.deleteItem(listId, itemId) }
+function deleteItem(listId, itemId) { boardStore.deleteItem(listId, itemId) }
 // 更新卡片內容
-function updateItem(listId, item) { board.updateItem(listId, item) }
+function updateItem(listId, item) { boardStore.updateItem(listId, item) }
 // 開啟卡片詳情
 function openDetail(item, list) { detailDialog.item = { ...item }; detailDialog.listTitle = list.title; detailDialog.visible = true }
 // 關閉卡片詳情
 function closeDetail() { detailDialog.visible = false }
 // 詳情頁直接更新卡片
-function onDetailUpdate(item) { board.updateItemByTitle(detailDialog.listTitle, item) }
+function onDetailUpdate(item) { boardStore.updateItemByTitle(detailDialog.listTitle, item) }
 // 重設預設清單
-function resetLists() { board.resetDefaultLists(); alert('已重設預設清單') }
+function resetLists() { boardStore.resetDefaultLists(); alert('已重設預設清單') }
 
 // 卡片詳情彈窗狀態
 const detailDialog = reactive({ visible: false, item: {}, listTitle: '' })

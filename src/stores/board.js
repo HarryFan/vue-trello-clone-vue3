@@ -1,26 +1,25 @@
 /**
- * Trello-like看板的核心資料儲存與操作邏輯
- * 使用Pinia管理看板的清單和卡片資料
+ * Trello-like 看板資料管理 Pinia Store
+ * 完整串接後端 API，確保資料一致性。
+ * - CRUD 皆以 API 回傳資料為主
+ * - 本地 localStorage 僅做快取
  */
 import { defineStore } from 'pinia'
-import { createCard } from '@/services/apiService'
+import {
+  getLists,
+  createList,
+  deleteList as apiDeleteList,
+  getCards,
+  createCard,
+  updateCard,
+  deleteCard as apiDeleteCard
+} from '@/services/apiService'
 
-/** 本地儲存的鍵名，用於保存看板資料 */
 const STORAGE_KEY = 'trello_lists_v3'
 
 /**
- * 預設看板結構，包含三個清單：待辦、進行中、完成
- * 每個清單包含範例卡片，展示資料結構
- */
-export const defaultLists = [
-  { id: 1, title: '待辦', items: [{ id: 11, title: '範例任務1', description: '說明...', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' }] },
-  { id: 2, title: '進行中', items: [{ id: 21, title: '範例任務2', description: '', subItems: [], images: [], createdAt: '2024-03-16T03:24:00.000Z' }] },
-  { id: 3, title: '完成', items: [] }
-]
-
-/**
- * 從localStorage讀取保存的看板資料
- * @returns {Array|null} 成功返回看板資料陣列，失敗返回null
+ * 從 localStorage 讀取 lists 快取
+ * @returns {Array|null}
  */
 function loadLists() {
   try {
@@ -32,112 +31,98 @@ function loadLists() {
 }
 
 /**
- * 將看板資料保存到localStorage
- * @param {Array} lists - 要保存的看板資料
+ * lists 寫入 localStorage
+ * @param {Array} lists
  */
 function saveLists(lists) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(lists))
-  } catch (e) { }
+  } catch (e) {}
 }
 
-/**
- * 看板資料管理的Pinia Store
- */
 export const useBoardStore = defineStore('board', {
-  /**
-   * 初始化Store狀態
-   * 嘗試從localStorage載入資料，若無則使用預設值
-   */
   state: () => ({
-    lists: loadLists() || JSON.parse(JSON.stringify(defaultLists))
+    /**
+     * lists 結構：[{ id, title, items: [card...] }]
+     */
+    lists: [],
+    loading: false
   }),
   actions: {
     /**
-     * 移動整個清單位置
-     * @param {number} oldIndex - 清單原始位置
-     * @param {number} newIndex - 清單目標位置
+     * 初始化：從 API 載入 lists 與 cards
+     * @param {number} boardId
      */
-    moveList(oldIndex, newIndex) {
-      const list = this.lists.splice(oldIndex, 1)[0]
-      this.lists.splice(newIndex, 0, list)
-      this.persist()
-    },
-
-    /**
-     * 跨清單移動卡片
-     * @param {number} fromListId - 來源清單ID
-     * @param {number} toListId - 目標清單ID
-     * @param {number} fromIdx - 卡片在來源清單中的索引
-     * @param {number} toIdx - 卡片在目標清單中的目標索引
-     */
-    moveItemAcrossLists(fromListId, toListId, fromIdx, toIdx) {
-      const fromList = this.lists.find(l => l.id === fromListId)
-      const toList = this.lists.find(l => l.id === toListId)
-      if (!fromList || !toList) return
-      const item = fromList.items.splice(fromIdx, 1)[0]
-      toList.items.splice(toIdx, 0, item)
-      this.persist()
-    },
-
-    /**
-     * 保存當前狀態到localStorage
-     */
-    persist() {
-      saveLists(this.lists)
-    },
-
-    /**
-     * 重設看板為預設三清單結構
-     */
-    resetDefaultLists() {
-      this.lists = JSON.parse(JSON.stringify(defaultLists))
-      this.persist()
-      console.log('[Pinia] 已重設為預設三清單')
-    },
-
-    /**
-     * 新增清單
-     * @param {string} title - 清單標題
-     */
-    addList(title) {
-      console.log('[Pinia] addList called, title:', title)
-      if (!title) {
-        console.warn('[Pinia] 新增清單失敗：名稱為空')
-        return
+    async fetchLists(boardId) {
+      this.loading = true
+      try {
+        const res = await getLists(boardId)
+        const lists = res.data?.data || res.data || []
+        // 依序載入每個 list 的 cards
+        const listsWithCards = await Promise.all(
+          lists.map(async l => {
+            const cardsRes = await getCards(l.id)
+            const cards = cardsRes.data?.data || cardsRes.data || []
+            return { ...l, items: cards }
+          })
+        )
+        this.lists = listsWithCards
+        saveLists(this.lists)
+      } catch (err) {
+        // 若 API 失敗，fallback localStorage
+        const cache = loadLists()
+        if (cache) this.lists = cache
+      } finally {
+        this.loading = false
       }
-      this.lists.push({ id: Date.now(), title, items: [] })
-      this.persist()
-      console.log('[Pinia] 新增清單成功，lists:', this.lists)
     },
 
     /**
-     * 刪除指定ID的清單
-     * @param {number} listId - 要刪除的清單ID
+     * 新增清單（串接 API，id 以後端為主）
+     * @param {number} boardId
+     * @param {string} title
      */
-    deleteList(listId) {
-      this.lists = this.lists.filter(l => l.id !== listId)
-      this.persist()
+    async addList(boardId, title) {
+      if (!title) return
+      try {
+        const res = await createList(boardId, { title })
+        const list = res.data?.data || res.data
+        if (list) {
+          this.lists.push({ ...list, items: [] })
+          saveLists(this.lists)
+        }
+      } catch (err) {
+        console.error('[Pinia] 新增清單 API 失敗', err)
+      }
     },
 
     /**
-     * 新增卡片到指定清單（已串接 API）
-     * @param {number} listId - 目標清單ID
-     * @param {object} cardData - 卡片資料
+     * 刪除清單（串接 API）
+     * @param {number} listId
+     */
+    async deleteList(listId) {
+      try {
+        await apiDeleteList(listId)
+        this.lists = this.lists.filter(l => l.id !== listId)
+        saveLists(this.lists)
+      } catch (err) {
+        console.error('[Pinia] 刪除清單 API 失敗', err)
+      }
+    },
+
+    /**
+     * 新增卡片（串接 API）
+     * @param {number} listId
+     * @param {object} cardData
      */
     async addCard(listId, cardData) {
-      console.log('[Pinia] addCard called, listId:', listId, 'cardData:', cardData)
-      // API 串接
       try {
         const res = await createCard(listId, cardData)
-        const card = res.data?.data || res.data // 後端回傳卡片資料
+        const card = res.data?.data || res.data
         const list = this.lists.find(l => l.id === listId)
         if (list && card) {
           list.items.push(card)
-          this.persist()
-          console.log('[Pinia] 新增卡片成功（API），list:', list)
-        } else {
-          console.warn('[Pinia] 新增卡片失敗：找不到清單或卡片資料', listId, card)
+          saveLists(this.lists)
         }
       } catch (err) {
         console.error('[Pinia] 新增卡片 API 失敗', err)
@@ -145,53 +130,67 @@ export const useBoardStore = defineStore('board', {
     },
 
     /**
-     * 從指定清單中刪除卡片
-     * @param {number} listId - 清單ID
-     * @param {number} itemId - 要刪除的卡片ID
+     * 刪除卡片（串接 API）
+     * @param {number} listId
+     * @param {number} cardId
      */
-    deleteItem(listId, itemId) {
-      const list = this.lists.find(l => l.id === listId)
-      if (list) {
-        list.items = list.items.filter(i => i.id !== itemId)
-        this.persist()
+    async deleteItem(listId, cardId) {
+      try {
+        await apiDeleteCard(cardId)
+        const list = this.lists.find(l => l.id === listId)
+        if (list) {
+          list.items = list.items.filter(i => i.id !== cardId)
+          saveLists(this.lists)
+        }
+      } catch (err) {
+        console.error('[Pinia] 刪除卡片 API 失敗', err)
       }
     },
 
     /**
-     * 更新指定清單中的卡片資料
-     * @param {number} listId - 清單ID
-     * @param {object} updatedItem - 包含更新資料的卡片物件，必須包含id
+     * 更新卡片（串接 API）
+     * @param {number} listId
+     * @param {object} updatedItem 必須含 id
      */
-    updateItem(listId, updatedItem) {
-      const list = this.lists.find(l => l.id === listId)
-      if (list) {
-        const idx = list.items.findIndex(i => i.id === updatedItem.id)
-        if (idx !== -1) {
-          // 若有 updatedItem.date，則同步更新卡片的 date
-          list.items[idx] = {
-            ...list.items[idx],
-            ...updatedItem,
-            date: updatedItem.date !== undefined ? updatedItem.date : list.items[idx].date,
+    async updateItem(listId, updatedItem) {
+      try {
+        const res = await updateCard(updatedItem.id, updatedItem)
+        const card = res.data?.data || res.data
+        const list = this.lists.find(l => l.id === listId)
+        if (list && card) {
+          const idx = list.items.findIndex(i => i.id === card.id)
+          if (idx !== -1) {
+            list.items[idx] = { ...list.items[idx], ...card }
+            saveLists(this.lists)
           }
-          this.persist()
         }
+      } catch (err) {
+        console.error('[Pinia] 更新卡片 API 失敗', err)
       }
     },
 
     /**
-     * 根據清單標題更新卡片資料
-     * @param {string} listTitle - 清單標題
-     * @param {object} updatedItem - 包含更新資料的卡片物件，必須包含id
+     * 拖曳/排序功能（純前端）
      */
-    updateItemByTitle(listTitle, updatedItem) {
-      const list = this.lists.find(l => l.title === listTitle)
-      if (list) {
-        const idx = list.items.findIndex(i => i.id === updatedItem.id)
-        if (idx !== -1) {
-          list.items[idx] = { ...updatedItem }
-          this.persist()
-        }
-      }
+    moveList(oldIndex, newIndex) {
+      const list = this.lists.splice(oldIndex, 1)[0]
+      this.lists.splice(newIndex, 0, list)
+      saveLists(this.lists)
+    },
+    moveItemAcrossLists(fromListId, toListId, fromIdx, toIdx) {
+      const fromList = this.lists.find(l => l.id === fromListId)
+      const toList = this.lists.find(l => l.id === toListId)
+      if (!fromList || !toList) return
+      const item = fromList.items.splice(fromIdx, 1)[0]
+      toList.items.splice(toIdx, 0, item)
+      saveLists(this.lists)
+    },
+    persist() {
+      saveLists(this.lists)
+    },
+    resetDefaultLists() {
+      this.lists = []
+      saveLists(this.lists)
     }
   }
 })

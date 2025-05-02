@@ -19,7 +19,14 @@
       </span>
     </div>
     <div v-if="item.images && item.images.length" class="card-images">
-      <img v-for="(img, idx) in item.images" :key="idx" :src="img" class="card-image-thumb" alt="卡片圖片" />
+      <img
+        v-for="(img, idx) in item.images"
+        :key="idx"
+        v-if="img && img.startsWith('data:image/')"
+        :src="img"
+        class="card-image-thumb"
+        alt="卡片圖片"
+      />
     </div>
     <div>
       <p class="item-title">{{ item.title || item.text }}</p>
