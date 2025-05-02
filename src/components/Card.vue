@@ -31,7 +31,7 @@
       <p class="item-timestamp">
         <i class="far fa-clock"></i>
         <span class="timestamp-label">建立：</span>
-        <span class="timestamp-value">{{ formatCreatedAt(item.createdAt) }}</span>
+        <span class="timestamp-value">{{ formatCreatedAt(item.created_at) }}</span>
         <template v-if="item.deadline">
           <br>
           <i class="far fa-calendar-alt"></i>
