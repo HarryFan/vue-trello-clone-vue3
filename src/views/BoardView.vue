@@ -57,16 +57,6 @@
           <label style="font-size:0.98em;">日期</label>
           <input v-model="addCardDialog.date" type="date" style="padding:6px 10px;border-radius:6px;border:1.5px solid #e3f0fd;font-size:1em;" />
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <label style="font-size:0.98em;">上傳圖片</label>
-          <input type="file" multiple accept="image/*" @change="handleImageUpload" />
-          <div v-if="addCardDialog.images.length" style="display:flex;flex-wrap:wrap;gap:8px;">
-            <div v-for="(img, idx) in addCardDialog.images" :key="img.url" style="position:relative;display:inline-block;">
-              <img :src="img.url" :alt="img.name" style="width:56px;height:56px;object-fit:cover;border-radius:6px;border:1px solid #e3e3e3;" />
-              <button @click="removeImage(idx)" style="position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid #e57373;color:#e53935;font-size:1em;border-radius:50%;width:22px;height:22px;line-height:18px;cursor:pointer;">×</button>
-            </div>
-          </div>
-        </div>
         <div style="display:flex;gap:12px;justify-content:flex-end;">
           <button type="button" class="primary" @click="submitAddCard">確定</button>
           <button type="button" class="danger" @click="closeAddCardDialog">取消</button>
@@ -146,7 +136,6 @@ const addCardDialog = reactive({
   title: '', // 卡片標題
   description: '', // 卡片描述
   date: '', // 卡片日期
-  images: [], // 預覽圖片
   errors: {} // 表單驗證錯誤
 })
 
@@ -170,8 +159,7 @@ function submitAddCard() {
     {
       title: addCardDialog.title,
       description: addCardDialog.description,
-      date: addCardDialog.date,
-      images: addCardDialog.images.map(img => img.url)
+      date: addCardDialog.date
     }
   )
   closeAddCardDialog()
@@ -184,7 +172,6 @@ function openAddCardDialog(listId) {
   addCardDialog.title = ''
   addCardDialog.description = ''
   addCardDialog.date = ''
-  addCardDialog.images = []
   addCardDialog.errors = {}
 }
 // 關閉新增卡片彈窗
@@ -194,23 +181,7 @@ function closeAddCardDialog() {
   addCardDialog.title = ''
   addCardDialog.description = ''
   addCardDialog.date = ''
-  addCardDialog.images = []
   addCardDialog.errors = {}
-}
-// 上傳圖片，轉成 base64 預覽
-async function handleImageUpload(e) {
-  const files = Array.from(e.target.files)
-  addCardDialog.images = await Promise.all(files.map(file => {
-    return new Promise(resolve => {
-      const reader = new FileReader()
-      reader.onload = ev => resolve({ name: file.name, url: ev.target.result })
-      reader.readAsDataURL(file)
-    })
-  }))
-}
-// 移除預覽圖片
-function removeImage(idx) {
-  addCardDialog.images.splice(idx, 1)
 }
 
 // 編輯卡片表單

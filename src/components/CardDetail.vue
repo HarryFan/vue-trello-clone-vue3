@@ -19,23 +19,6 @@
           @keyup.esc="resetDesc"
         />
       </div>
-      <!-- 圖片上傳/預覽區塊 -->
-      <div class="card-detail__section">
-        <label class="card-detail__label">圖片</label>
-        <div class="images">
-          <div v-for="imgId in editImages" :key="imgId" class="image-preview">
-            <img :src="getImageFromStorage(imgId)" alt="Task image" />
-            <button class="delete is-small" @click="removeImage(imgId)">刪除</button>
-          </div>
-          <div class="image-upload">
-            <input type="file" ref="fileInput" accept="image/*" @change="onImageUpload" style="display:none" />
-            <button type="info" plain @click="triggerFileInput">
-              <i class="fas fa-upload"></i>
-              <span>上傳圖片</span>
-            </button>
-          </div>
-        </div>
-      </div>
       <!-- 細項清單區塊 -->
       <div class="card-detail__section">
         <label class="card-detail__label">細項</label>
@@ -81,14 +64,14 @@ watch(() => props.modelValue, v => (visible.value = v))
 
 const editTitle = ref(props.item.title)
 const editDesc = ref(props.item.description || '')
-const editImages = ref(props.item.images ? [...props.item.images] : [])
+const editImages = ref([])
 const editSubItems = ref(props.item.subItems ? JSON.parse(JSON.stringify(props.item.subItems)) : [])
 const newSubItemText = ref('')
 
 watch(() => props.item, (val) => {
   editTitle.value = val.title
   editDesc.value = val.description || ''
-  editImages.value = val.images ? [...val.images] : []
+  editImages.value = []
   editSubItems.value = val.subItems ? JSON.parse(JSON.stringify(val.subItems)) : []
   newSubItemText.value = ''
 }, { immediate: true })
@@ -118,42 +101,9 @@ function emitUpdate() {
     ...props.item,
     title: editTitle.value,
     description: editDesc.value,
-    images: editImages.value,
     subItems: editSubItems.value,
     updatedAt: new Date().toISOString(),
   })
-}
-function getImageFromStorage(imgId) {
-  // TODO: 實際專案請實作圖片讀取
-  return ''
-}
-function removeImage(imgId) {
-  // TODO: 實際專案請實作圖片刪除
-  editImages.value = editImages.value.filter(id => id !== imgId)
-  emitUpdate()
-}
-function triggerFileInput() {
-  // 觸發 input[type=file]
-  document.querySelector('input[type=file][ref=fileInput]')?.click()
-}
-function onImageUpload(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  if (file.size > 1024 * 1024) {
-    alert('圖片大小不能超過 1MB')
-    return
-  }
-  const reader = new FileReader()
-  reader.onload = (evt) => {
-    const base64 = evt.target.result
-    // TODO: 請根據專案需求存儲圖片並獲取 imgId
-    // const imgId = saveImageToStorage(base64)
-    // if (imgId) {
-    //   editImages.value.push(imgId)
-    //   emitUpdate()
-    // }
-  }
-  reader.readAsDataURL(file)
 }
 function addSubItem() {
   const text = newSubItemText.value.trim()
@@ -208,32 +158,6 @@ function addSubItem() {
   resize: vertical;
   background: white;
   color: #1a4894;
-}
-.images {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.image-preview {
-  position: relative;
-  width: 80px;
-  height: 80px;
-}
-.image-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 4px;
-}
-.delete {
-  position: absolute;
-  top: 3px;
-  right: 3px;
-  z-index: 2;
-}
-.image-upload {
-  display: flex;
-  align-items: center;
 }
 .subitems {
   display: flex;

@@ -18,16 +18,6 @@
         <span class="tooltip-text">刪除</span>
       </span>
     </div>
-    <div v-if="item.images && item.images.length" class="card-images">
-      <img
-        v-for="(img, idx) in item.images"
-        :key="idx"
-        v-if="img && img.startsWith('data:image/')"
-        :src="img"
-        class="card-image-thumb"
-        alt="卡片圖片"
-      />
-    </div>
     <div>
       <p class="item-title">{{ item.title || item.text }}</p>
       <p class="item-description" v-if="item.description">{{ item.description }}</p>
@@ -39,15 +29,14 @@
         </div>
       </div>
       <p class="item-timestamp">
+        <i class="far fa-clock"></i>
+        <span class="timestamp-label">建立：</span>
+        <span class="timestamp-value">{{ formatCreatedAt(item.createdAt) }}</span>
         <template v-if="item.deadline">
+          <br>
           <i class="far fa-calendar-alt"></i>
-          <span class="timestamp-label">任務截止日期：</span>
+          <span class="timestamp-label">截止：</span>
           <span class="timestamp-value">{{ item.deadline }}</span>
-        </template>
-        <template v-else>
-          <i class="far fa-clock"></i>
-          <span class="timestamp-label">建立：</span>
-          <span class="timestamp-value">{{ formatCreatedAt(item.createdAt) }}</span>
         </template>
       </p>
     </div>
@@ -57,11 +46,11 @@
 <script setup>
 /**
  * 卡片組件 Card.vue
- * 顯示單一任務卡片內容，包含標題、描述、細項、圖片、日期與操作 icon。
+ * 顯示單一任務卡片內容，包含標題、描述、細項、日期與操作 icon。
  * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。
  * - 支援編輯、刪除、細項切換等互動。
  * @module Card
- * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、圖片、細項等。
+ * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、細項等。
  * @prop {String} listTitle - 所屬清單名稱。
  * @event edit - 點擊編輯 icon 時發出，傳遞 item。
  * @event delete - 點擊刪除 icon 時發出，傳遞 item。
@@ -152,13 +141,17 @@ function emitDelete() {
   emit('delete', props.item)
 }
 /**
- * 格式化日期顯示（yyyy/MM/dd HH:mm）
- * @param {string|Date} createdAt - 時間字串或物件
+ * 將 created_at 格式 "2025-05-02 11:17:49" 轉為 "2025/05/02 11:17"
+ * 支援後端回傳的 SQL DATETIME 格式
+ * @param {string} createdAt
  * @returns {string}
  */
 function formatCreatedAt(createdAt) {
   if (!createdAt) return ''
-  const d = new Date(createdAt)
+  // 修正 SQL DATETIME 格式為 JS 標準格式
+  const normalized = createdAt.replace(' ', 'T')
+  const d = new Date(normalized)
+  if (isNaN(d.getTime())) return createdAt // 若解析失敗，直接回傳原字串
   const yyyy = d.getFullYear()
   const mm = (d.getMonth() + 1).toString().padStart(2, '0')
   const dd = d.getDate().toString().padStart(2, '0')
@@ -177,6 +170,10 @@ function toggleSubItem(idx) {
   )
   emit('update', { ...props.item, subItems: newSubItems, updatedAt: new Date().toISOString() })
 }
+
+const imagesForDisplay = computed(() => {
+  return []
+})
 </script>
 
 <style scoped>
@@ -202,58 +199,6 @@ function toggleSubItem(idx) {
   box-shadow: 0 4px 16px #1976d233, 0 2px 8px #b6d4ff44;
   transform: translateY(-2px) scale(1.02);
   border-color: #90caf9;
-}
-.card-images {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 6px;
-}
-.card-image-thumb {
-  width: 48px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: 5px;
-  border: 1px solid #e3e3e3;
-}
-@media (max-width: 600px) {
-  .card {
-    padding: 10px 6px 8px 6px;
-    margin-bottom: 12px;
-    border-radius: 8px;
-    box-shadow: 0 1.5px 8px rgba(33,150,243,0.10);
-  }
-  .card-images {
-    gap: 4px;
-    margin-bottom: 4px;
-  }
-  .card-image-thumb {
-    width: 36px;
-    height: 36px;
-    border-radius: 4px;
-  }
-  .item-title {
-    font-size: 1em;
-    margin-bottom: 4px;
-  }
-  .item-description {
-    font-size: 0.85em;
-    margin-bottom: 2px;
-  }
-  .item-timestamp {
-    font-size: 0.68em;
-    margin-top: 2px;
-  }
-  .icons {
-    top: 7px;
-    right: 7px;
-    gap: 0.3em;
-  }
-  .icon-edit, .icon-delete {
-    width: 20px;
-    height: 20px;
-    font-size: 1em;
-  }
 }
 .item-title {
   font-weight: bold;
