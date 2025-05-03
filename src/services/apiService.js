@@ -7,7 +7,8 @@
  */
 import axios from 'axios'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://www.blueshot.com/api/'
+// 這裡將 baseURL 改為本機 CI4 API 位置
+const baseURL = 'http://localhost:8080/'
 
 const api = axios.create({
   baseURL,
