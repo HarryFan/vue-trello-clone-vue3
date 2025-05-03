@@ -7,55 +7,14 @@
 import axios from 'axios'
 
 // 從環境變數取得 API 基礎 URL
-const DEFAULT_BASE_URL = 'http://localhost:8080/'
+const DEFAULT_BASE_URL = 'http://localhost:8085/'
 const baseURL = import.meta.env.VITE_API_BASE_URL || DEFAULT_BASE_URL
-
-// 建立一個動態檢測 API 連線的函數
-const checkApiEndpoints = async () => {
-  // 嘗試 8080-8089 的埠號
-  const ports = [8080, 8081, 8082, 8083, 8084, 8085, 8086, 8087, 8088, 8089]
-  const hosts = ['localhost', '127.0.0.1'] // 嘗試不同的主機名
-  
-  for (const host of hosts) {
-    for (const port of ports) {
-      try {
-        // 使用簡單的 fetch 請求，僅檢查能否連線而不依賴回應內容
-        const response = await fetch(`http://${host}:${port}/api`, { 
-          method: 'GET',
-          cache: 'no-cache',
-          headers: { 'Accept': 'application/json' },
-          // 設定較短的超時時間，以加快檢測速度
-          signal: AbortSignal.timeout(500)
-        })
-        
-        // 只要請求成功，就視為該埠號可用
-        if (response.ok) {
-          console.log(`發現 API 伺服器在 ${host}:${port}`)
-          return `http://${host}:${port}/`
-        } else {
-          console.log(`${host}:${port} 連線成功但回應錯誤: ${response.status}`)
-        }
-      } catch (error) {
-        // 如果是超時錯誤，不顯示錯誤堆疊
-        if (error.name === 'AbortError') {
-          console.log(`${host}:${port} 連線超時`)
-        } else {
-          console.log(`${host}:${port} 連線失敗`)
-        }
-      }
-    }
-  }
-  
-  // 如果都找不到，返回預設值
-  console.warn('無法找到可用的 API 端點，使用預設值')
-  return baseURL
-}
 
 // 先創建一個使用預設 URL 的 axios 實例
 let api = axios.create({
   baseURL,
   timeout: 10000,
-  withCredentials: true,
+  withCredentials: false, // 改為 false 避免 CORS 憑證問題
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -71,40 +30,14 @@ api.interceptors.request.use(config => {
   return config
 })
 
-// 初始化函數，可選用於動態更新 baseURL
+// 初始化函數，直接使用環境變數中的 URL
 export const initApi = async () => {
   try {
-    console.log('初始化 API，目前 baseURL:', baseURL)
-    const detectedBaseUrl = await checkApiEndpoints()
-    console.log('檢測到的 API URL:', detectedBaseUrl)
-    
-    // 如果檢測到的 URL 與當前不同，則重新創建 api 實例
-    if (detectedBaseUrl !== api.defaults.baseURL) {
-      console.log(`更新 API 基礎 URL 為: ${detectedBaseUrl}`)
-      api = axios.create({
-        baseURL: detectedBaseUrl,
-        timeout: 10000,
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      })
-      
-      // 重新添加請求攔截器
-      api.interceptors.request.use(config => {
-        const token = localStorage.getItem('trello_token')
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`
-        }
-        return config
-      })
-    }
-    
+    console.log('初始化 API，使用 baseURL:', baseURL)
     return api
   } catch (error) {
     console.error('初始化 API 失敗', error)
-    return api // 返回原始實例作為備用
+    return api
   }
 }
 

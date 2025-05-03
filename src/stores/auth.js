@@ -1,51 +1,52 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { login as apiLogin } from '@/services/apiService'
+import { ref, computed } from 'vue'
+import apiService from '@/services/apiService'
 
-const TOKEN_KEY = 'trello_token'
-const USER_KEY = 'trello_user'
-
-export const useAuthStore = defineStore('auth', () => {
-  const token = ref(localStorage.getItem(TOKEN_KEY) || '')
-  const user = ref(JSON.parse(localStorage.getItem(USER_KEY) || 'null'))
-  const loading = ref(false)
-
-  const isAuthenticated = () => Boolean(token.value)
-
-  const login = async (email, password) => {
-    loading.value = true
-    try {
-      const res = await apiLogin({ email, password })
-      const { token: newToken, ...userData } = res.data
-
-      token.value = newToken
-      user.value = userData
-
-      localStorage.setItem(TOKEN_KEY, newToken)
-      localStorage.setItem(USER_KEY, JSON.stringify(userData))
-
-      return userData
-    } catch (err) {
-      console.error('[Auth] 登入失敗', err)
-      throw new Error(err.response?.data?.message || '登入失敗，請稍後再試')
-    } finally {
-      loading.value = false
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    user: JSON.parse(localStorage.getItem('trello_user')) || null,
+    token: localStorage.getItem('trello_token') || null,
+    loading: false,
+    error: null,
+  }),
+  
+  getters: {
+    isAuthenticated() {
+      return !!this.token && !!this.user
     }
-  }
-
-  const logout = () => {
-    token.value = ''
-    user.value = null
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(USER_KEY)
-  }
-
-  return {
-    token,
-    user,
-    loading,
-    isAuthenticated,
-    login,
-    logout
+  },
+  
+  actions: {
+    async login(credentials) {
+      this.loading = true
+      this.error = null
+      
+      try {
+        const response = await apiService.login(credentials)
+        const userData = response.data
+        
+        // 儲存使用者資訊和 token
+        this.user = userData
+        this.token = userData.token
+        
+        localStorage.setItem('trello_user', JSON.stringify(userData))
+        localStorage.setItem('trello_token', userData.token)
+        
+        return userData
+      } catch (error) {
+        this.error = error.response?.data?.messages || '登入失敗，請確認帳號密碼'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    logout() {
+      // 清除使用者資訊和 token
+      this.user = null
+      this.token = null
+      localStorage.removeItem('trello_user')
+      localStorage.removeItem('trello_token')
+    }
   }
 })
