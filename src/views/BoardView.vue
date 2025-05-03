@@ -74,7 +74,7 @@
 
 <script setup>
 import { ref, computed, reactive, onMounted } from 'vue'
-import { Draggable } from 'vue3-draggable-next'
+import Draggable from 'vuedraggable'  // 修改為直接導入 vuedraggable
 import { useRouter } from 'vue-router'
 import { useBoardStore } from '@/stores/board'
 import { useAuthStore } from '@/stores/auth'

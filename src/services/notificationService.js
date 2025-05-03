@@ -235,9 +235,19 @@ export class NotificationService {
     
     const notificationOptions = {
       body: body,
-      icon: '/favicon.ico',
+      icon: '/favicon.ico', // 使用現有的網站圖示
       tag: `task-${task.id}`, // 避免重複通知
       requireInteraction: true, // 要求使用者互動才會關閉
+      actions: [ // 在支援的瀏覽器中顯示按鈕
+        {
+          action: 'view',
+          title: '查看任務'
+        },
+        {
+          action: 'dismiss',
+          title: '稍後提醒'
+        }
+      ],
       data: {
         boardId: task.board_id,
         taskId: task.id,
@@ -263,9 +273,10 @@ export class NotificationService {
       
       console.log(`已發送通知: ${title} - ${body}`)
 
-      // 同時創建一個備用的內部通知元素（以防瀏覽器通知無法顯示）
-      // this.createInPageNotification(title, body, task)
+      // 同時創建一個備用的內部通知元素
+      this.createInPageNotification(title, body, task)
 
+      // 點擊通知時的行為
       notification.onclick = () => {
         window.focus()
         // 導航到對應的任務卡片
@@ -279,6 +290,17 @@ export class NotificationService {
           this.markAsRead(this.notificationLogs[logIndex].id)
         }
       }
+      
+      // 處理通知動作
+      navigator.serviceWorker.ready.then(function(registration) {
+        registration.addEventListener('notificationclick', function(event) {
+          if (event.action === 'view') {
+            window.focus()
+            router.push(`/board/${task.board_id}?task=${task.id}`)
+          }
+          event.notification.close()
+        })
+      }).catch(err => console.log('Service Worker 註冊失敗', err))
     } catch (error) {
       console.error('創建通知時發生錯誤:', error)
       // 如果通知創建失敗，仍保存到日誌
@@ -301,30 +323,76 @@ export class NotificationService {
     container.style.top = '20px'
     container.style.right = '20px'
     container.style.zIndex = '9999'
-    container.style.backgroundColor = '#333'
-    container.style.color = '#fff'
+    container.style.backgroundColor = '#ffffff'
+    container.style.color = '#333333'
     container.style.padding = '15px'
-    container.style.borderRadius = '4px'
-    container.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)'
-    container.style.maxWidth = '300px'
+    container.style.borderRadius = '8px'
+    container.style.boxShadow = '0 5px 15px rgba(0,0,0,0.15)'
+    container.style.maxWidth = '320px'
     container.style.cursor = 'pointer'
+    container.style.transition = 'all 0.3s ease'
+    container.style.borderLeft = '4px solid #4b97d2'
+    container.style.fontFamily = 'Arial, sans-serif'
     
     container.innerHTML = `
-      <div style="font-weight: bold; margin-bottom: 5px;">${title}</div>
-      <div>${body}</div>
+      <div style="display: flex; align-items: flex-start;">
+        <div style="flex-grow: 1;">
+          <div style="font-weight: bold; margin-bottom: 6px; color: #4b97d2; font-size: 14px;">
+            ${title}
+          </div>
+          <div style="font-size: 13px; color: #555;">
+            ${body}
+          </div>
+        </div>
+        <div style="margin-left: 10px; color: #999; font-size: 16px; cursor: pointer;">
+          ×
+        </div>
+      </div>
     `
+    
+    // 滑鼠移過時的效果
+    container.onmouseover = () => {
+      container.style.boxShadow = '0 8px 20px rgba(0,0,0,0.2)'
+      container.style.transform = 'translateY(-2px)'
+    }
+    
+    container.onmouseout = () => {
+      container.style.boxShadow = '0 5px 15px rgba(0,0,0,0.15)'
+      container.style.transform = 'translateY(0)'
+    }
     
     container.onclick = () => {
       document.body.removeChild(container)
       router.push(`/board/${task.board_id}?task=${task.id}`)
     }
     
-    // 5秒後自動消失
-    setTimeout(() => {
-      if (document.body.contains(container)) {
+    // 獲取關閉按鈕並添加點擊事件
+    const closeBtn = container.querySelector('div[style*="margin-left: 10px"]')
+    if (closeBtn) {
+      closeBtn.onclick = (e) => {
+        e.stopPropagation() // 阻止事件冒泡
         document.body.removeChild(container)
       }
-    }, 5000)
+    }
+    
+    // 添加淡入效果
+    container.style.opacity = '0'
+    setTimeout(() => {
+      container.style.opacity = '1'
+    }, 10)
+    
+    // 8秒後自動消失
+    setTimeout(() => {
+      if (document.body.contains(container)) {
+        container.style.opacity = '0'
+        container.style.transform = 'translateY(10px)'
+        setTimeout(() => {
+          if (document.body.contains(container)) {
+            document.body.removeChild(container)
+          }
+        }, 300)
+      }
+    }, 8000)
     
     document.body.appendChild(container)
   }

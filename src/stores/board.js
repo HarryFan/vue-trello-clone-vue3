@@ -66,15 +66,40 @@ export const useBoardStore = defineStore('board', {
         
         console.log('API 返回的清單資料:', lists)
         
-        // 依序載入每個 list 的 cards
-        const listsWithCards = await Promise.all(
-          lists.map(async l => {
-            const cardsRes = await getCards(l.id)
-            const cards = cardsRes.data?.data || cardsRes.data || []
-            return { ...l, items: cards }
-          })
-        )
-        this.lists = listsWithCards
+        // 處理清單資料，確保結構正確
+        const listsWithCards = lists.map(list => {
+          // 檢查清單是否已包含卡片資料
+          if (list.cards) {
+            // API 已經返回了卡片資料，直接使用
+            return { ...list, items: list.cards }
+          } else {
+            // 如果沒有卡片資料，設為空陣列
+            return { ...list, items: [] }
+          }
+        })
+        
+        // 檢查是否需要再次請求卡片資料
+        if (listsWithCards.length > 0 && !lists[0].cards) {
+          // 原始 API 回傳沒有包含卡片，需要個別請求
+          const finalLists = await Promise.all(
+            listsWithCards.map(async l => {
+              try {
+                const cardsRes = await getCards(l.id)
+                const cards = cardsRes.data?.data || cardsRes.data || []
+                return { ...l, items: cards }
+              } catch (error) {
+                console.error(`獲取清單 ${l.id} 的卡片失敗:`, error)
+                return l
+              }
+            })
+          )
+          this.lists = finalLists
+        } else {
+          // 直接使用已處理的資料
+          this.lists = listsWithCards
+        }
+        
+        // 儲存到本地快取
         saveLists(this.lists)
       } catch (err) {
         console.error('[Pinia] 載入清單失敗:', err)
