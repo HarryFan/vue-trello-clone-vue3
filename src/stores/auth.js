@@ -18,20 +18,24 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     try {
       const res = await apiLogin({ email, password })
-      const { token: newToken, ...userData } = res.data
+      const userData = res.data
 
-      token.value = newToken
-      user.value = userData
-      userId.value = userData.id
+      token.value = userData.token
+      user.value = {
+        id: userData.id,
+        email: userData.email,
+        name: userData.name
+      }
+      userId.value = userData.id.toString()
 
-      localStorage.setItem(TOKEN_KEY, newToken)
-      localStorage.setItem(USER_KEY, JSON.stringify(userData))
-      localStorage.setItem(USER_ID_KEY, userData.id)
+      localStorage.setItem(TOKEN_KEY, userData.token)
+      localStorage.setItem(USER_KEY, JSON.stringify(user.value))
+      localStorage.setItem(USER_ID_KEY, userData.id.toString())
 
-      return userData
+      return user.value
     } catch (err) {
       console.error('[Auth] 登入失敗', err)
-      throw new Error(err.response?.data?.message || '登入失敗，請稍後再試')
+      throw new Error(err.response?.data?.messages?.error || '登入失敗，請稍後再試')
     } finally {
       loading.value = false
     }

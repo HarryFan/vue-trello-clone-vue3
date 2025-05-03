@@ -72,32 +72,39 @@
 </template>
 
 <script setup>
-// ===== 主要邏輯區 =====
-// 1. 狀態與元件註冊
-// 2. 拖曳、表單、彈窗等互動行為
-// 3. 清單/卡片 CRUD 操作
-import Card from '@/components/Card.vue'
-import UiItemForm from '@/components/UiItemForm.vue'
-import UiModal from '@/components/UiModal.vue'
-import { useAuthStore } from '@/stores/auth'
-import { useBoardStore } from '@/stores/board'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
+import { Draggable } from 'vue3-draggable-next'
 import { useRouter } from 'vue-router'
-import Draggable from 'vue3-draggable-next'
+import { useBoardStore } from '@/stores/board'
+import { useAuthStore } from '@/stores/auth'
+import Card from '@/components/Card.vue'
+import UiModal from '@/components/UiModal.vue'
+import UiItemForm from '@/components/UiItemForm.vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-// 預設看板 ID
-const boardId = 1
-
+// 初始化 store
+const router = useRouter()
 const boardStore = useBoardStore()
 const authStore = useAuthStore()
-const router = useRouter()
+const boardId = 1 // 目前只有一個看板
 
-// 用戶名稱
+// 使用者名稱
 const userName = computed(() => authStore.user?.name || '使用者')
 
-// 取得所有清單（reactive，拖曳時自動更新）
+// 登出處理
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/login')
+}
+
+// 重設看板
+const resetLists = async () => {
+  await boardStore.resetDefaultLists(boardId)
+}
+
+// 取得看板資料
 const lists = computed(() => boardStore.lists)
+
 // 新增清單的輸入框
 const newListTitle = ref('')
 // 錯誤訊息顯示
@@ -224,25 +231,11 @@ function openDetail(item, list) { detailDialog.item = { ...item }; detailDialog.
 function closeDetail() { detailDialog.visible = false }
 // 詳情頁直接更新卡片
 function onDetailUpdate(item) { boardStore.updateItemByTitle(detailDialog.listTitle, item) }
-// 重設預設清單
-async function resetLists() {
-  try {
-    await boardStore.resetDefaultLists(boardId)
-  } catch (err) {
-    console.error('重設清單失敗', err)
-  }
-}
 
 // 卡片詳情彈窗狀態
 const detailDialog = reactive({ visible: false, item: {}, listTitle: '' })
 // 編輯/新增卡片表單彈窗狀態
 const formDialog = reactive({ visible: false, listId: null, data: {}, edit: false, editId: null })
-
-// 登出功能
-function handleLogout() {
-  authStore.logout()
-  router.push('/login')
-}
 </script>
 
 <style lang="scss" scoped>

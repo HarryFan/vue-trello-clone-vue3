@@ -8,21 +8,23 @@
 import axios from 'axios'
 
 // 這裡將 baseURL 改為本機 CI4 API 位置
-const baseURL = 'http://localhost:8080/'
+const baseURL = 'http://localhost:8890/'
 
 const api = axios.create({
   baseURL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest'
   },
+  withCredentials: true
 })
 
 // 添加請求攔截器，自動添加 token 和 user id
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('trello_token')
   const userId = localStorage.getItem('trello_user_id')
-  
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -30,6 +32,33 @@ api.interceptors.request.use(config => {
     config.headers['X-User-Id'] = userId
   }
   return config
+}, error => {
+  console.error('API 請求配置錯誤:', error)
+  return Promise.reject(error)
+})
+
+// 添加響應攔截器，處理錯誤
+api.interceptors.response.use(response => {
+  return response
+}, error => {
+  if (error.response) {
+    // 伺服器回應錯誤
+    console.error('API 錯誤:', error.response.data)
+    if (error.response.status === 401) {
+      // 未授權，清除本地存儲並重新導向到登入頁
+      localStorage.removeItem('trello_token')
+      localStorage.removeItem('trello_user')
+      localStorage.removeItem('trello_user_id')
+      window.location.href = '/login'
+    }
+  } else if (error.request) {
+    // 請求未收到回應
+    console.error('API 無回應:', error.request)
+  } else {
+    // 請求配置錯誤
+    console.error('API 請求錯誤:', error.message)
+  }
+  return Promise.reject(error)
 })
 
 // Auth
