@@ -86,7 +86,7 @@ export const useBoardStore = defineStore('board', {
       if (!title) return
       try {
         const res = await createList(boardId, { title })
-        const list = res.data?.data || res.data
+        const list = res.data
         if (list) {
           this.lists.push({ ...list, items: [] })
           saveLists(this.lists)
