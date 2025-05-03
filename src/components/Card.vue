@@ -1,11 +1,11 @@
 <template>
   <div class="card" :class="cardClasses" :data-id="item.id">
     <div class="icons">
-      <span v-if="isDue" class="icon icon-due tooltip" :title="`此任務將於 ${item.deadline} 到期，剩餘 ${getHoursLeft()} 小時，請盡快處理！`">
+      <span v-if="isDue" class="icon icon-due tooltip" :title="`此任務將於 ${formatDeadline(item.deadline)} 到期，剩餘 ${getHoursLeft()} 小時，請盡快處理！`">
         <font-awesome-icon :icon="['fas','star']" />
         <span class="tooltip-text">任務即將到期，剩餘 {{ getHoursLeft() }} 小時</span>
       </span>
-      <span v-else-if="timestamp" class="icon icon-date tooltip" :title="`此任務已設定截止日期（${item.deadline}），目前距離到期超過 3 天`">
+      <span v-else-if="timestamp" class="icon icon-date tooltip" :title="`此任務已設定截止日期（${formatDeadline(item.deadline)}），目前距離到期超過 3 天`">
         <font-awesome-icon :icon="['fas','bell']" />
         <span class="tooltip-text">已設定截止日期，尚未進入提醒區間</span>
       </span>
@@ -36,7 +36,7 @@
           <br>
           <i class="far fa-calendar-alt"></i>
           <span class="timestamp-label">截止：</span>
-          <span class="timestamp-value">{{ item.deadline }}</span>
+          <span class="timestamp-value">{{ formatDeadline(item.deadline) }}</span>
         </template>
       </p>
     </div>
@@ -159,6 +159,25 @@ function formatCreatedAt(createdAt) {
   const min = d.getMinutes().toString().padStart(2, '0')
   return `${yyyy}/${mm}/${dd} ${hh}:${min}`
 }
+
+/**
+ * 將 deadline 格式化為 "YYYY/MM/DD HH:mm" 格式
+ * @param {string} deadline
+ * @returns {string}
+ */
+function formatDeadline(deadline) {
+  if (!deadline) return ''
+  const normalized = deadline.replace(' ', 'T')
+  const d = new Date(normalized)
+  if (isNaN(d.getTime())) return deadline
+  const yyyy = d.getFullYear()
+  const mm = (d.getMonth() + 1).toString().padStart(2, '0')
+  const dd = d.getDate().toString().padStart(2, '0')
+  const hh = d.getHours().toString().padStart(2, '0')
+  const min = d.getMinutes().toString().padStart(2, '0')
+  return `${yyyy}/${mm}/${dd} ${hh}:${min}`
+}
+
 /**
  * 細項勾選切換，發送 update 事件
  * @param {number} idx - 細項索引
