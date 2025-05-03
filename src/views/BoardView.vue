@@ -9,6 +9,9 @@
         <button type="button" class="warning" @click="resetLists">
           <font-awesome-icon :icon="['fas','rotate-right']" />重設清單
         </button>
+        <button type="button" class="info" @click="testNotification">
+          <font-awesome-icon :icon="['fas','bell']" />測試通知
+        </button>
       </div>
     </header>
     <p class="subtitle">請在輸入框新增清單與卡片。</p>
@@ -82,18 +85,27 @@ import Card from '@/components/Card.vue'
 import UiModal from '@/components/UiModal.vue'
 import UiItemForm from '@/components/UiItemForm.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { NotificationService } from '@/services/notificationService'
 
 // 初始化 store
 const router = useRouter()
 const boardStore = useBoardStore()
 const authStore = useAuthStore()
 const boardId = 1 // 目前只有一個看板
+const notificationService = new NotificationService()
+
+// 啟動通知服務
+onMounted(() => {
+  notificationService.startPolling()
+  console.log('通知服務已啟動')
+})
 
 // 使用者名稱
 const userName = computed(() => authStore.user?.name || '使用者')
 
 // 登出處理
-const handleLogout = () => {
+function handleLogout() {
+  notificationService.stopPolling()
   authStore.logout()
   router.push('/login')
 }
@@ -237,6 +249,19 @@ function onDetailUpdate(item) { boardStore.updateItemByTitle(detailDialog.listTi
 const detailDialog = reactive({ visible: false, item: {}, listTitle: '' })
 // 編輯/新增卡片表單彈窗狀態
 const formDialog = reactive({ visible: false, listId: null, data: {}, edit: false, editId: null })
+
+// 測試通知
+function testNotification() {
+  const testTask = {
+    id: 999,
+    board_id: boardId,
+    title: '測試通知任務',
+    list_title: '測試清單',
+    deadline: new Date(Date.now() + 15 * 60000).toISOString() // 15分鐘後
+  }
+  notificationService.showNotification(testTask)
+  console.log('已觸發測試通知')
+}
 </script>
 
 <style lang="scss" scoped>
@@ -293,6 +318,15 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
 
       &:hover {
         background-color: #e0a800;
+      }
+    }
+
+    .info {
+      background-color: #2196f3;
+      color: #fff;
+
+      &:hover {
+        background-color: #1565c0;
       }
     }
 
@@ -444,6 +478,20 @@ button {
     box-shadow: 0 1px 3px #e5737333;
   }
   &.primary {
+    background-color: #2196f3;
+    color: #fff;
+    border: none;
+    padding: 7px 18px;
+    font-size: 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px #1976d233;
+    transition: background 0.15s, box-shadow 0.15s;
+    &:hover {
+      background-color: #1565c0;
+    }
+  }
+  &.info {
     background-color: #2196f3;
     color: #fff;
     border: none;
