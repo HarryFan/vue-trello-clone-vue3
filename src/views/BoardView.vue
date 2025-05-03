@@ -9,9 +9,11 @@
         <button type="button" class="warning" @click="resetLists">
           <font-awesome-icon :icon="['fas','rotate-right']" />重設清單
         </button>
+        <!-- 隱藏測試通知按鈕 
         <button type="button" class="info" @click="testNotification">
           <font-awesome-icon :icon="['fas','bell']" />測試通知
         </button>
+        -->
       </div>
     </header>
     <p class="subtitle">請在輸入框新增清單與卡片。</p>
