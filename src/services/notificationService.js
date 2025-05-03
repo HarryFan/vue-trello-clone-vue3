@@ -334,18 +334,28 @@ export class NotificationService {
     container.style.borderLeft = '4px solid #4b97d2'
     container.style.fontFamily = 'Arial, sans-serif'
     
+    // 創建 Font Awesome 圖示
+    const bellIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16" style="fill:#4b97d2;margin-right:8px;">
+      <path d="M224 0c-17.7 0-32 14.3-32 32V51.2C119 66 64 130.6 64 208v18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416H416c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8V208c0-77.4-55-142-128-156.8V32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"/>
+    </svg>`;
+    
+    const closeIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="14" height="14" style="fill:#999;margin-left:8px;cursor:pointer;">
+      <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
+    </svg>`;
+    
     container.innerHTML = `
       <div style="display: flex; align-items: flex-start;">
         <div style="flex-grow: 1;">
-          <div style="font-weight: bold; margin-bottom: 6px; color: #4b97d2; font-size: 14px;">
+          <div style="display:flex;align-items:center;font-weight: bold; margin-bottom: 6px; color: #4b97d2; font-size: 14px;">
+            ${bellIconSvg}
             ${title}
           </div>
-          <div style="font-size: 13px; color: #555;">
+          <div style="font-size: 13px; color: #555; margin-left: 24px;">
             ${body}
           </div>
         </div>
-        <div style="margin-left: 10px; color: #999; font-size: 16px; cursor: pointer;">
-          ×
+        <div style="margin-left: 10px; color: #999; font-size: 16px; cursor: pointer;" class="notification-close">
+          ${closeIconSvg}
         </div>
       </div>
     `
@@ -367,13 +377,15 @@ export class NotificationService {
     }
     
     // 獲取關閉按鈕並添加點擊事件
-    const closeBtn = container.querySelector('div[style*="margin-left: 10px"]')
-    if (closeBtn) {
-      closeBtn.onclick = (e) => {
-        e.stopPropagation() // 阻止事件冒泡
-        document.body.removeChild(container)
+    setTimeout(() => {
+      const closeBtn = container.querySelector('.notification-close')
+      if (closeBtn) {
+        closeBtn.onclick = (e) => {
+          e.stopPropagation() // 阻止事件冒泡
+          document.body.removeChild(container)
+        }
       }
-    }
+    }, 10)
     
     // 添加淡入效果
     container.style.opacity = '0'
