@@ -1,6 +1,74 @@
 # Vue Trello Clone (Vue 3 + Vite)
 
-## Trello Clone API 規格
+## 專案概述
+
+這是一個模仿 Trello 的任務管理系統，使用 Vue 3 + Vite 開發，支援完整的任務管理功能、拖曳排序、截止日期提醒等功能。前端採用現代化的組件架構和設計模式，實現了高度互動性和良好的用戶體驗。
+
+## 已完成功能
+
+### 1. 核心功能
+
+- **用戶管理**
+  - 用戶註冊與登入：支援電子郵件和密碼登入
+  - 身份驗證：使用 JWT token 進行 API 認證
+  - 使用者基本資料顯示
+
+- **任務管理**
+  - 看板系統：支援建立及管理多個任務看板
+  - 清單管理：在看板內建立多個清單（如「待辦」、「進行中」、「完成」）
+  - 卡片操作：創建、編輯、刪除任務卡片，支援標題、描述和截止日期
+  - 拖曳排序：支援清單間的卡片拖曳，及清單內卡片順序調整
+  - 任務詳情：點擊卡片顯示詳細資訊和可進行的操作
+
+- **通知系統**
+  - 即時提醒：任務接近截止日期時自動提醒
+  - 頁面內通知：直接在頁面中顯示提醒訊息
+  - 瀏覽器通知：支援瀏覽器原生推送通知（需用戶授權）
+  - 通知偏好：用戶可設定通知方式和時間
+
+- **時間管理**
+  - 截止日期設定：為任務設定準確到分鐘的截止時間
+  - 視覺化提示：即將到期和已逾期任務有明確的視覺標記
+  - 倒數計時：顯示距離截止時間的剩餘時間
+
+- **資料持久化**
+  - 本地儲存：使用 localStorage 保存部分數據，確保刷新頁面後數據不丟失
+  - 遠端同步：與後端 API 同步所有操作，確保數據一致性
+
+### 2. 使用者體驗優化
+
+- **響應式設計**
+  - 適應不同設備尺寸，從手機到桌面電腦都有良好的顯示效果
+  - 流暢的動畫過渡和互動反饋
+
+- **錯誤處理**
+  - 友好的錯誤提示和引導
+  - 網絡錯誤自動重試和離線模式支援
+
+- **性能優化**
+  - 高效的組件渲染和狀態管理
+  - 延遲加載和資源優化
+
+- **無障礙支援**
+  - 適當的顏色對比度
+  - 鍵盤導航支援
+  - 螢幕閱讀器兼容的標記
+
+### 3. 特色功能
+
+- **卡片狀態視覺化**
+  - 不同的視覺指示器顯示任務狀態（即將到期、已過期、已完成）
+  - 清晰的時間顯示和排版
+
+- **多種互動方式**
+  - 拖放操作：直觀調整任務優先順序和狀態
+  - 內容編輯：便捷的表單和輸入控制
+
+- **通知與提醒系統**
+  - 多層次的通知機制，確保用戶不會錯過重要任務
+  - 符合人體工學的通知設計和交互流程
+
+## API 規格
 
 ### 1. 用戶（Users）
 - **登入**：
@@ -20,6 +88,8 @@
         {
           "id": 1001,
           "title": "寫 API 規格",
+          "description": "任務詳細描述",
+          "list_title": "待辦",
           "deadline": "2025-04-30T23:59:59"
         }
       ]
@@ -72,193 +142,48 @@
   - Headers: `{ "Authorization": "Bearer jwt_token" }`
   - Response: `{ "id": "7" }`
 
-### 6. 基本原則
-- 所有請求需帶 Authorization Header（登入 API 除外）
-- 所有 id 由後端產生，前端必須用 API 回傳的 id
-- 新增、查詢、刪除、更新皆回傳完整物件
-- 欄位如需擴充，雙方討論後調整
+## 專案架構
 
----
+主要組件和文件：
 
-後端規格詳見 codeigniter-trello-api/README.md
+- `src/views/BoardView.vue`：主看板頁面，整合所有功能
+- `src/components/UiItemForm.vue`：卡片新增/編輯表單
+- `src/components/Card.vue`：卡片展示與操作
+- `src/components/CardDetail.vue`：卡片詳情彈窗
+- `src/services/notificationService.js`：通知服務
+- `src/services/apiService.js`：API 服務
+- `src/stores/board.js`：Pinia 狀態管理
+- `src/stores/auth.js`：認證狀態管理
+- `src/router/index.js`：路由配置
+- `src/assets/styles`：全局樣式表
 
-本專案為 Vue 2 Trello 任務管理板的 Vue 3 + Vite 全新重構版，UI 為自訂 UI 元素，狀態管理改用 Pinia，所有資料皆支援 localStorage 持久化。
-
-> 本專案最終能實現 Trello 風格的拖曳排序（Drag and Drop），關鍵在於未採用 Element Plus 官方 UI 排版元件，而是改用客製化 UI 元素與自訂元件結構，確保
-> vue3-dnd、vue3-draggable-next 等拖曳套件能無縫整合、互動順暢。此設計大幅提升拖曳體驗與兼容性。
-
----
-
-## 開發環境 Node 版本
-- 本專案建議使用 Node.js 18.x（需符合 Vite 及相關依賴需求）
-- 切換方式建議使用 nvm：
-
-```bash
-nvm use 18
-```
-
-如遇 Vite 啟動錯誤，請確認 Node 版本是否正確。
-
----
-
-## 快速啟動
+## 快速開始
 
 > **請使用 Node.js 18 以上版本**
 
 ```bash
+# 安裝依賴
 npm install
+
+# 啟動開發服務器
 npm run dev
+
+# 構建生產環境版本
+npm run build
 ```
 
----
-
-## 專案開發狀態
-
-- ✅ 已完成主要功能開發，專案進入維護/優化階段。
-- ✅ 支援卡片任務 CRUD、拖曳排序、截止日提醒、圖片上傳。
-- ✅ 表單驗證與 UX 提升，錯誤提示明確。
-- ✅ snapshot.py 自動產生 snapshot.json，完整記錄 API 結構（含 JSDoc、inputs/outputs）。
-- ✅ 主要元件皆有 JSDoc 註解，方便自動化與維護。
-
----
-
-## 如何查詢 API/元件結構
-
-- 執行 `python3 snapshot.py` 可自動產生/更新 snapshot.json。
-- snapshot.json 內含所有 Vue/JS 檔案的 props、emits、functions（含 JSDoc、參數、回傳型別）。
-- 可用於自動產生文件、API 對照、快速檢索現有功能。
-
----
-
-## 專案架構簡介
-
-- `src/views/BoardView.vue`：主看板頁
-- `src/components/UiItemForm.vue`：新增/編輯卡片表單
-- `src/components/Card.vue`：卡片展示與操作
-- `src/components/CardDetail.vue`：卡片詳情彈窗
-- `src/stores/board.js`：Pinia 狀態管理
-- `src/router/index.js`：路由設定
-- `snapshot.py`、`snapshot.json`：網站快照工具與快照資料
-
----
-
-## 部署資料夾命名建議
-
-部署到 Bluehost 時，請將專案資料夾命名如下，方便協作與維護：
-
-```
-public_html/
-  ├── backend/    # CodeIgniter 3 API 專案（原 codeigniter-trello-api）
-  └── frontend/   # React/Vue 前端專案（build 後靜態檔案）
-```
-
-- `backend/`：放置 API 與 PHP 程式。
-- `frontend/`：放置 React/Vue build 後的靜態網頁。
-- 前端 `.env.production` 的 API 路徑請設為 `/backend/`。
-- 上傳到 Bluehost 時，將原本的專案資料夾重新命名即可，不影響程式內容運作。
-
-此命名方式有助於團隊協作、維護與路徑辨識，建議所有協作者遵循。
-
----
-
-## 部署到 Bluehost 實用教學
-
-### 1. CodeIgniter 3 API 專案部署（PHP/MySQL）
-
-1. **確認 Bluehost 支援 PHP 7.x（或相容版本）**
-   - 登入 Bluehost 控制台，檢查 PHP 版本（建議 PHP 7.3~7.4）。
-
-2. **上傳專案檔案**
-   - 將 `codeigniter-trello-api` 專案所有檔案（包含 `application`、`system`、`index.php`、`database.sql` 等）上傳到 Bluehost 的 `public_html/trello-api/` 目錄（可自訂子資料夾）。
-
-3. **設定資料庫**
-   - 在 Bluehost 後台建立 MySQL 資料庫與帳號。
-   - 匯入 `database.sql`（用 phpMyAdmin 或 Bluehost 提供的匯入工具）。
-
-4. **設定連線資訊**
-   - 編輯 `application/config/database.php`，填入你的 MySQL 資料庫名稱、帳號、密碼。
-
-5. **調整 index.php 路徑**
-   - 若放在子目錄，需確認 `index.php` 內的 `$system_path`、`$application_folder` 設定正確。
-   - 例：`$application_folder = 'application';`
-
-6. **設定 .htaccess（可選）**
-   - 讓網址不帶 `index.php`，在 `public_html/trello-api/` 建立 `.htaccess`：
-     ```
-     RewriteEngine on
-     RewriteCond %{REQUEST_FILENAME} !-f
-     RewriteCond %{REQUEST_FILENAME} !-d
-     RewriteRule ^(.*)$ index.php/$1 [L]
-     ```
-
-7. **測試 API**
-   - 用 Postman 或瀏覽器測試 `https://你的網域/trello-api/api/boards` 等 API 路徑。
-
-### 2. Vue3 前端專案部署（靜態網頁）
-
-1. **打包前端專案**
-   - 在本機專案目錄執行：
-     ```
-     npm run build
-     ```
-   - 產生 `dist/` 目錄（Vite 預設）。
-
-2. **上傳靜態檔案**
-   - 將 `dist/` 內所有檔案，上傳到 Bluehost 的 `public_html/` 或你想要的子資料夾（如 `public_html/trello/`）。
-
-3. **API 連線設定**
-   - 確認 `.env.production` 內的 `VITE_API_BASE_URL` 指向你的 API 路徑，例如：
-     ```
-     VITE_API_BASE_URL=https://你的網域/trello-api/
-     ```
-   - 若前端與 API 不同子目錄，請確保 CORS 設定允許跨域（CI3 預設允許 GET/POST，必要時可加 CORS header）。
-
-4. **測試前端網站**
-   - 直接瀏覽 `https://你的網域/` 或 `https://你的網域/trello/`，確認能正常呼叫 API。
-
-### 3. 常見問題與建議
-
-- **API 路徑建議**：API 放在 `/trello-api/`，靜態前端放根目錄或 `/trello/`，可避免路徑衝突。
-- **安全建議**：資料庫帳密請勿公開，建議設定目錄權限。
-- **CORS 問題**：如遇跨域問題，可在 CI3 Controller 加上：
-  ```php
-  header('Access-Control-Allow-Origin: *');
-  header('Access-Control-Allow-Headers: Authorization, Content-Type');
-  ```
-- **SEO**：靜態前端可直接用 Bluehost 靜態空間，無需 Node.js server。
-
----
-
-## 技術棧與設計原則
+## 技術棧
 
 - 前端框架：Vue 3 (`vue@^3.5.13`)
 - 構建工具：Vite (`vite@^6.3.1`)
 - 狀態管理：Pinia (`pinia@^3.0.2`)
 - 路由：Vue Router (`vue-router@^4.5.1`)
-- UI/元件庫：Element Plus（如有）、自訂模組
-- 拖曳互動：vue3-dnd (`vue3-dnd@^2.1.0`)、vue3-draggable-next、vue3-smooth-dnd
-- 圖示：Font Awesome (`@fortawesome/vue-fontawesome`、`free-solid-svg-icons`)
-- 樣式：Sass（`sass-embedded`）
-- 打包/插件：@vitejs/plugin-vue、@rollup/plugin-commonjs
-- 設計系統：模組化、現代、風格統一（依 Airbnb JS Style Guide）
-- 文件：JSDoc + Markdown，強調清晰、簡潔、可追溯
-
-> 依 package.json 實際依賴版本同步維護
-
----
-
-## 參考資源
-
-- [Font Awesome 圖示](https://fontawesome.com/icons/)
-- [vue3-dnd 拖曳](https://www.vue3-dnd.com/guide/)
-
----
+- 拖曳互動：vue3-dnd (`vue3-dnd@^2.1.0`)、vue3-draggable-next
+- 圖示：Font Awesome
+- 樣式：Sass
+- 設計原則：模組化、現代簡約、可重用性
 
 ## 聯絡方式
 
 - Email: harry750110@gmail.com
 - LinkedIn: [范綱栓](https://www.linkedin.com/in/%E7%B6%B1%E6%A0%93-%E8%8C%AF-810868219/)
-
----
-
-**感謝參與本專案開發！如需協助或有新想法，歡迎隨時交流。**
