@@ -56,9 +56,16 @@ export const useBoardStore = defineStore('board', {
      */
     async fetchLists(boardId) {
       this.loading = true
+      
+      // 清除舊快取，確保每次都從 API 獲取最新資料
+      localStorage.removeItem(STORAGE_KEY)
+      
       try {
         const res = await getLists(boardId)
         const lists = res.data?.data || res.data || []
+        
+        console.log('API 返回的清單資料:', lists)
+        
         // 依序載入每個 list 的 cards
         const listsWithCards = await Promise.all(
           lists.map(async l => {
@@ -70,6 +77,8 @@ export const useBoardStore = defineStore('board', {
         this.lists = listsWithCards
         saveLists(this.lists)
       } catch (err) {
+        console.error('[Pinia] 載入清單失敗:', err)
+        
         // 若 API 失敗，fallback localStorage
         const cache = loadLists()
         if (cache) this.lists = cache

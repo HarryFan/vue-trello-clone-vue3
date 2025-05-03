@@ -10,7 +10,8 @@
     </div>
     <div class="form-group">
       <label>任務截止日期</label>
-      <input type="date" v-model="form.deadline" />
+      <input type="datetime-local" v-model="form.deadline" />
+      <div class="hint">選擇精確到分鐘的截止時間</div>
     </div>
     <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
     <div class="form-actions">
@@ -102,5 +103,9 @@ button.primary {
   padding: 6px 12px;
   font-size: 14px;
   cursor: pointer;
+}
+.hint {
+  font-size: 12px;
+  color: #666;
 }
 </style>

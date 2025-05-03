@@ -148,36 +148,76 @@ function emitDelete() {
  */
 function formatCreatedAt(createdAt) {
   if (!createdAt) return ''
-  // 修正 SQL DATETIME 格式為 JS 標準格式
-  const normalized = createdAt.replace(' ', 'T')
-  const d = new Date(normalized)
-  if (isNaN(d.getTime())) return createdAt // 若解析失敗，直接回傳原字串
-  const yyyy = d.getFullYear()
-  const mm = (d.getMonth() + 1).toString().padStart(2, '0')
-  const dd = d.getDate().toString().padStart(2, '0')
-  const hh = d.getHours().toString().padStart(2, '0')
-  const min = d.getMinutes().toString().padStart(2, '0')
-  return `${yyyy}/${mm}/${dd} ${hh}:${min}`
+  
+  try {
+    // 標準化日期字串，確保能被 Date 物件正確解析
+    // 先將日期字串標準化為 ISO 格式
+    const normalized = createdAt.replace(' ', 'T')
+    
+    // 將本地日期轉換為 Date 物件
+    const d = new Date(normalized)
+    
+    // 檢查日期是否有效
+    if (isNaN(d.getTime())) {
+      console.warn('無效的日期格式', createdAt)
+      return createdAt || ''
+    }
+    
+    // 格式化為 2025/05/02 11:17 格式
+    const yyyy = d.getFullYear()
+    const mm = (d.getMonth() + 1).toString().padStart(2, '0')
+    const dd = d.getDate().toString().padStart(2, '0')
+    const hh = d.getHours().toString().padStart(2, '0')
+    const min = d.getMinutes().toString().padStart(2, '0')
+    
+    return `${yyyy}/${mm}/${dd} ${hh}:${min}`
+  } catch (e) {
+    console.error('日期格式化錯誤', e)
+    return createdAt || ''
+  }
 }
 
 /**
- * 將 deadline 格式化為 "YYYY/MM/DD HH:mm" 格式
+ * 將 deadline 格式化為 "YYYY/MM/DD HH:mm" 格式（包含時間）
  * @param {string} deadline
  * @returns {string}
  */
 function formatDeadline(deadline) {
   if (!deadline) return ''
-  const normalized = deadline.replace(' ', 'T')
-  const d = new Date(normalized)
-  if (isNaN(d.getTime())) return deadline
-  const yyyy = d.getFullYear()
-  const mm = (d.getMonth() + 1).toString().padStart(2, '0')
-  const dd = d.getDate().toString().padStart(2, '0')
-  const hh = d.getHours().toString().padStart(2, '0')
-  const min = d.getMinutes().toString().padStart(2, '0')
-  return `${yyyy}/${mm}/${dd} ${hh}:${min}`
+  
+  try {
+    // 嘗試處理不同的日期格式
+    // 如果日期只有 YYYY-MM-DD 格式，無需轉換為 ISO
+    let d;
+    
+    if (deadline.includes('T') || deadline.includes(' ')) {
+      // 包含時間的日期格式 (YYYY-MM-DD HH:MM:SS 或 ISO)
+      const normalized = deadline.replace(' ', 'T')
+      d = new Date(normalized)
+    } else {
+      // 純日期格式 (YYYY-MM-DD)
+      d = new Date(deadline)
+    }
+    
+    // 檢查日期是否有效
+    if (isNaN(d.getTime())) {
+      console.warn('無效的截止日期格式', deadline)
+      return deadline
+    }
+    
+    // 對截止日期顯示完整的日期和時間
+    const yyyy = d.getFullYear()
+    const mm = (d.getMonth() + 1).toString().padStart(2, '0')
+    const dd = d.getDate().toString().padStart(2, '0')
+    const hh = d.getHours().toString().padStart(2, '0')
+    const min = d.getMinutes().toString().padStart(2, '0')
+    
+    return `${yyyy}/${mm}/${dd} ${hh}:${min}`
+  } catch (e) {
+    console.error('截止日期格式化錯誤', e)
+    return deadline || ''
+  }
 }
-
 /**
  * 細項勾選切換，發送 update 事件
  * @param {number} idx - 細項索引
