@@ -1,11 +1,16 @@
 <template>
-  <div class="board-view">
-    <div class="board-header">
-      <h2>任務清單</h2>
-      <button type="button" class="warning" @click="resetLists">
-        <font-awesome-icon :icon="['fas','rotate-right']" />重設清單
-      </button>
-    </div>
+  <div class="board">
+    <header class="board-header">
+      <div class="header-left">
+        <h1>{{ userName }}的任務清單</h1>
+      </div>
+      <div class="header-right">
+        <button class="logout-btn" @click="handleLogout">登出</button>
+        <button type="button" class="warning" @click="resetLists">
+          <font-awesome-icon :icon="['fas','rotate-right']" />重設清單
+        </button>
+      </div>
+    </header>
     <p class="subtitle">請在輸入框新增清單與卡片。</p>
 
     <div class="lists-container">
@@ -54,7 +59,7 @@
         <div v-if="addCardDialog.errors.title" class="input-error-text">{{ addCardDialog.errors.title }}</div>
         <textarea v-model="addCardDialog.description" placeholder="描述 (選填)" style="padding:8px 10px;border-radius:6px;border:1.5px solid #e3f0fd;font-size:1em;min-height:60px;resize:vertical;"></textarea>
         <div style="display:flex;align-items:center;gap:8px;">
-          <label style="font-size:0.98em;">日期</label>
+          <label style="font-size:0.98em;">任務截止日期</label>
           <input v-model="addCardDialog.date" type="date" style="padding:6px 10px;border-radius:6px;border:1.5px solid #e3f0fd;font-size:1em;" />
         </div>
         <div style="display:flex;gap:12px;justify-content:flex-end;">
@@ -71,17 +76,25 @@
 // 1. 狀態與元件註冊
 // 2. 拖曳、表單、彈窗等互動行為
 // 3. 清單/卡片 CRUD 操作
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useBoardStore } from '@/stores/board'
 import Card from '@/components/Card.vue'
 import UiItemForm from '@/components/UiItemForm.vue'
 import UiModal from '@/components/UiModal.vue'
+import { useAuthStore } from '@/stores/auth'
+import { useBoardStore } from '@/stores/board'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import Draggable from 'vue3-draggable-next'
 
-// 假設目前僅支援單一預設看板，boardId 寫死為 1
+// 預設看板 ID
 const boardId = 1
+
 const boardStore = useBoardStore()
+const authStore = useAuthStore()
+const router = useRouter()
+
+// 用戶名稱
+const userName = computed(() => authStore.user?.name || '使用者')
 
 // 取得所有清單（reactive，拖曳時自動更新）
 const lists = computed(() => boardStore.lists)
@@ -201,59 +214,100 @@ function closeDetail() { detailDialog.visible = false }
 // 詳情頁直接更新卡片
 function onDetailUpdate(item) { boardStore.updateItemByTitle(detailDialog.listTitle, item) }
 // 重設預設清單
-function resetLists() { boardStore.resetDefaultLists(); alert('已重設預設清單') }
+async function resetLists() {
+  try {
+    await boardStore.resetDefaultLists(boardId)
+  } catch (err) {
+    console.error('重設清單失敗', err)
+  }
+}
 
 // 卡片詳情彈窗狀態
 const detailDialog = reactive({ visible: false, item: {}, listTitle: '' })
 // 編輯/新增卡片表單彈窗狀態
 const formDialog = reactive({ visible: false, listId: null, data: {}, edit: false, editId: null })
+
+// 登出功能
+function handleLogout() {
+  authStore.logout()
+  router.push('/login')
+}
 </script>
 
 <style lang="scss" scoped>
-.list-header{margin: 0 0 1rem 0;
-  display: flex;justify-content: space-between;
-  ;
-
-}
-.board-view {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 0 32px 0;
-  min-height: 100vh;
-  box-sizing: border-box;
-  background: #f5f8fb;
-  position: relative;
+.board {
+  padding: 1rem;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
 }
 
 .board-header {
-
-  position: relative;
   display: flex;
-  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto 8px auto;
-    padding: 0 1rem 0 1rem;
-  box-sizing: border-box;
-  background: transparent;
-  min-height: 56px;
-  h2 {
-    margin: 0;
-    font-size: 1.6em;
-    font-weight: 600;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+  .header-left {
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #2c3e50;
+    }
   }
-  button.warning {
-    position: absolute;
-    right: 20px;
-    top: 0;
-    margin: 0;
-    flex-shrink: 0;
+
+  .header-right {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+
+    .logout-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #c82333;
+      }
+    }
+
+    .warning {
+      background-color: #ffc107;
+      color: #000;
+
+      &:hover {
+        background-color: #e0a800;
+      }
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.2s;
+    }
   }
 }
-.subtitle{
-  padding: 0 1rem 0 1rem;
+
+.subtitle {
+  margin: 0 0 1rem 0;
+  color: #6c757d;
 }
 
 .lists-container {
@@ -344,15 +398,6 @@ const formDialog = reactive({ visible: false, listId: null, data: {}, edit: fals
     box-sizing: border-box;
     overflow-x: unset;
   }
-  .board-header {
-
-    flex-direction: column;
-    align-items: flex-start;
-    button.warning {
-      position: static;
-      margin-top: 8px;
-    }
-  }
 }
 
 input, textarea {
@@ -375,7 +420,7 @@ input, textarea {
 button {
   &.warning {
     background-color: #ffc107;
-    color: #fff;
+    color: #000;
     border: none;
     padding: 7px 16px;
     font-size: 15px;
@@ -432,5 +477,42 @@ button {
   margin-top: 2px;
   margin-bottom: 6px;
   padding-left: 2px;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+
+  .list-drag-handle {
+    cursor: move;
+    padding: 0 0.5rem;
+    color: #6c757d;
+    font-size: 1.2rem;
+  }
+
+  .list-title {
+    flex: 1;
+    margin: 0;
+    padding: 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    text-align: center;
+  }
+
+  button.danger {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.9rem;
+    background: transparent;
+    color: #dc3545;
+    box-shadow: none;
+
+    &:hover {
+      background-color: #dc354520;
+    }
+  }
 }
 </style>

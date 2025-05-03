@@ -2,37 +2,81 @@
 
 ## Trello Clone API 規格
 
-### 1. Boards（看板）
+### 1. 用戶（Users）
+- **登入**：
+  - `POST /auth/login`
+  - Body: `{ "email": "user@example.com", "password": "password" }`
+  - Response: `{ "id": 1, "email": "user@example.com", "name": "User Name", "token": "jwt_token" }`
+
+### 2. 通知（Notifications）
+- **取得即將到期任務**：
+  - `GET /api/notifications/upcoming`
+  - Headers: `{ "Authorization": "Bearer jwt_token" }`
+  - Response: 
+    ```json
+    {
+      "success": true,
+      "data": [
+        {
+          "id": 1001,
+          "title": "寫 API 規格",
+          "deadline": "2025-04-30T23:59:59"
+        }
+      ]
+    }
+    ```
+
+### 3. Boards（看板）
 - **建立看板**：
   - `POST /boards`
+  - Headers: `{ "Authorization": "Bearer jwt_token" }`
   - Body: `{ "title": "新看板名稱", "user_id": 1 }`
   - Response: `{ "id": 2, "title": "新看板名稱", "user_id": 1, ... }`
 - **取得所有看板**：
   - `GET /boards?user_id=1`
+  - Headers: `{ "Authorization": "Bearer jwt_token" }`
   - Response: `[ { "id": 2, "title": "新看板名稱", "user_id": 1, ... }, ... ]`
 
-### 2. Lists（清單）
+### 4. Lists（清單）
 - **建立清單**：
   - `POST /boards/{boardId}/lists`
+  - Headers: `{ "Authorization": "Bearer jwt_token" }`
   - Body: `{ "title": "待辦", "position": 0 }`
   - Response: `{ "id": 4, "board_id": 2, "title": "待辦", ... }`
 - **取得看板下所有清單**：
   - `GET /boards/{boardId}/lists`
+  - Headers: `{ "Authorization": "Bearer jwt_token" }`
   - Response: `[ { "id": 4, "board_id": 2, "title": "待辦", ... }, ... ]`
+- **刪除清單**：
+  - `DELETE /lists/{listId}`
+  - Headers: `{ "Authorization": "Bearer jwt_token" }`
+  - Response: `{ "id": "4" }`
 
-### 3. Cards（卡片）
+### 5. Cards（卡片）
 - **建立卡片**：
   - `POST /lists/{listId}/cards`
-  - Body: `{ "title": "卡片標題", "description": "卡片描述", "position": 0, "date": "2025-05-10", "images": ["base64..."] }`
+  - Headers: `{ "Authorization": "Bearer jwt_token" }`
+  - Body: `{ "title": "卡片標題", "description": "卡片描述", "position": 0, "deadline": "2025-05-10", "images": ["base64..."] }`
   - Response: `{ "id": 7, "list_id": 4, "title": "卡片標題", ... }`
 - **取得清單下所有卡片**：
   - `GET /lists/{listId}/cards`
+  - Headers: `{ "Authorization": "Bearer jwt_token" }`
   - Response: `[ { "id": 7, "list_id": 4, "title": "卡片標題", ... }, ... ]`
+- **更新卡片**：
+  - `PUT /cards/{cardId}`
+  - Headers: `{ "Authorization": "Bearer jwt_token" }`
+  - Body: `{ "title": "新標題", "description": "新描述", "deadline": "2025-05-15" }`
+  - Response: `{ "id": 7, "list_id": 4, "title": "新標題", ... }`
+- **刪除卡片**：
+  - `DELETE /cards/{cardId}`
+  - Headers: `{ "Authorization": "Bearer jwt_token" }`
+  - Response: `{ "id": "7" }`
 
-### 4. 基本原則
-- 所有 id 由後端產生，前端必須用 API 回傳的 id。
-- 新增、查詢、刪除、更新皆回傳完整物件。
-- 欄位如需擴充，雙方討論後調整。
+### 6. 基本原則
+- 所有請求需帶 Authorization Header（登入 API 除外）
+- 所有 id 由後端產生，前端必須用 API 回傳的 id
+- 新增、查詢、刪除、更新皆回傳完整物件
+- 欄位如需擴充，雙方討論後調整
 
 ---
 

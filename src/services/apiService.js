@@ -18,6 +18,20 @@ const api = axios.create({
   },
 })
 
+// 添加請求攔截器，自動添加 token
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('trello_token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+// Auth
+export function login(data) {
+  return api.post('auth/login', data)
+}
+
 // Board
 export function getBoards() {
   return api.get('boards')
@@ -33,6 +47,13 @@ export function updateBoard(id, data) {
 }
 export function deleteBoard(id) {
   return api.delete(`boards/${id}`)
+}
+/**
+ * 重設看板為預設狀態
+ * @param {number} boardId
+ */
+export function resetBoard(boardId) {
+  return api.post(`boards/${boardId}/reset`)
 }
 
 // List
@@ -79,11 +100,13 @@ export function healthCheck() {
 }
 
 export default {
+  login,
   getBoards,
   getBoard,
   createBoard,
   updateBoard,
   deleteBoard,
+  resetBoard,
   getLists,
   getList,
   createList,

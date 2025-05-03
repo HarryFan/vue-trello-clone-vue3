@@ -12,7 +12,8 @@ import {
   getCards,
   createCard,
   updateCard,
-  deleteCard as apiDeleteCard
+  deleteCard as apiDeleteCard,
+  resetBoard
 } from '@/services/apiService'
 
 const STORAGE_KEY = 'trello_lists_v3'
@@ -188,9 +189,17 @@ export const useBoardStore = defineStore('board', {
     persist() {
       saveLists(this.lists)
     },
-    resetDefaultLists() {
-      this.lists = []
-      saveLists(this.lists)
+    /**
+     * 重設看板為預設狀態
+     * @param {number} boardId
+     */
+    async resetDefaultLists(boardId) {
+      try {
+        await resetBoard(boardId)
+        await this.fetchLists(boardId)
+      } catch (err) {
+        console.error('[Pinia] 重設看板 API 失敗', err)
+      }
     }
   }
 })
