@@ -1,9 +1,13 @@
 <template>
-  <div class="card" :class="cardClasses" :data-id="item.id">
+  <div class="task-card" :class="cardClasses" :data-id="item.id">
     <div class="icons">
       <span v-if="isDue" class="icon icon-due tooltip" :title="`此任務將於 ${formatDeadline(item.deadline)} 到期，剩餘 ${getHoursLeft()} 小時，請盡快處理！`">
         <font-awesome-icon :icon="['fas','star']" />
         <span class="tooltip-text">任務即將到期，剩餘 {{ getHoursLeft() }} 小時</span>
+      </span>
+      <span v-else-if="isOverdue" class="icon icon-overdue tooltip" :title="`此任務已於 ${formatDeadline(item.deadline)} 過期，請盡快處理！`">
+        <font-awesome-icon :icon="['fas','exclamation-circle']" />
+        <span class="tooltip-text">任務已過截止日期</span>
       </span>
       <span v-else-if="timestamp" class="icon icon-date tooltip" :title="`此任務已設定截止日期（${formatDeadline(item.deadline)}），目前距離到期超過 3 天`">
         <font-awesome-icon :icon="['fas','bell']" />
@@ -18,7 +22,7 @@
         <span class="tooltip-text">刪除</span>
       </span>
     </div>
-    <div>
+    <div class="card-content">
       <p class="item-title">{{ item.title || item.text }}</p>
       <p class="item-description" v-if="item.description">{{ item.description }}</p>
       <!-- 細項清單區塊（列表顯示） -->
@@ -29,15 +33,16 @@
         </div>
       </div>
       <p class="item-timestamp">
-        <i class="far fa-clock"></i>
-        <span class="timestamp-label">建立：</span>
-        <span class="timestamp-value">{{ formatCreatedAt(item.created_at) }}</span>
-        <template v-if="item.deadline">
-          <br>
+        <div class="timestamp-row">
+          <i class="far fa-clock"></i>
+          <span class="timestamp-label">建立：</span>
+          <span class="timestamp-value">{{ formatCreatedAt(item.created_at) }}</span>
+        </div>
+        <div v-if="item.deadline" class="timestamp-row">
           <i class="far fa-calendar-alt"></i>
           <span class="timestamp-label">截止：</span>
-          <span class="timestamp-value">{{ formatDeadline(item.deadline) }}</span>
-        </template>
+          <span class="timestamp-value" :class="{'text-danger': isOverdue}">{{ formatDeadline(item.deadline) }}</span>
+        </div>
       </p>
     </div>
   </div>
@@ -236,48 +241,81 @@ const imagesForDisplay = computed(() => {
 </script>
 
 <style scoped>
-.card {
+.task-card {
   position: relative;
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 2px 8px #1976d21a, 0 1.5px 4px #b6d4ff33;
-  margin-bottom: 16px;
-  padding: 16px 14px 10px 14px;
-  transition: box-shadow 0.2s, transform 0.2s;
-  border: 1.5px solid #e3f0fd;
+  background-color: white;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   cursor: pointer;
+  transition: all 0.3s;
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
-.card.completed-card {
-  background: #f7fafd;
-  color: #b0b0b0;
-  border: 1.5px solid #e0e0e0;
-  filter: grayscale(0.2);
-  opacity: 0.8;
+
+.task-card:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
 }
-.card:hover {
-  box-shadow: 0 4px 16px #1976d233, 0 2px 8px #b6d4ff44;
-  transform: translateY(-2px) scale(1.02);
-  border-color: #90caf9;
+
+.card-content {
+  margin-top: 25px;
 }
+
 .item-title {
   font-weight: bold;
-  font-size: 1.13em;
-  margin-bottom: 6px;
-  color: #1565c0;
+  margin-bottom: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.3;
+  font-size: 14px;
+  width: 100%;
 }
+
 .item-description {
-  font-size: 0.9em;
-  margin-bottom: 4px;
-  color: #2c3e50;
+  color: #666;
+  font-size: 12px;
+  margin-top: 0;
+  margin-bottom: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.3;
 }
+
 .item-timestamp {
-  font-size: 0.7em;
-  color: #8a8a8a;
-  margin-top: 4px;
+  color: #999;
+  font-size: 11px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
-.subitems {
-  margin: 6px 0 0 0;
+
+.timestamp-row {
+  display: flex;
+  align-items: center;
 }
+
+.timestamp-row i {
+  margin-right: 5px;
+}
+
+.timestamp-label {
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.text-danger {
+  color: #e57373;
+}
+
 .icons {
   position: absolute;
   top: 12px;
@@ -288,17 +326,21 @@ const imagesForDisplay = computed(() => {
   cursor: pointer;
   z-index: 2;
 }
+
 .is-overdue {
   color: red;
   border: 1px solid red;
 }
-.card:hover .icon-edit,
-.card:hover .icon-delete {
+
+.task-card:hover .icon-edit,
+.task-card:hover .icon-delete {
   display: flex;
 }
+
 .icon-edit, .icon-date {
   color: #DDD;
 }
+
 .icon-edit, .icon-delete {
   display: flex;
   align-items: center;
@@ -314,51 +356,72 @@ const imagesForDisplay = computed(() => {
   box-shadow: 0 1px 3px #1976d21a;
   cursor: pointer;
 }
+
 .icon-edit {
   color: #1976d2;
 }
+
 .icon-edit:hover {
   background: #e3f2fd;
   box-shadow: 0 2px 8px #1976d233;
 }
+
 .icon-delete {
   color: #e57373;
 }
+
 .icon-delete:hover {
   background: #ffebee;
   color: #c62828;
   box-shadow: 0 2px 8px #ffcdd233;
 }
+
 .icon-due {
   color: #ff9800;
 }
+
 .icon-due:hover {
   background: #fff3e0;
   box-shadow: 0 2px 8px #ff980044;
 }
+
+.icon-overdue {
+  color: #f44336;
+}
+
+.icon-overdue:hover {
+  background: #ffebee;
+  box-shadow: 0 2px 8px #f4433644;
+}
+
 .icon-date {
   color: #1976d2;
 }
+
 .icon-date:hover {
   background: #e3f2fd;
   box-shadow: 0 2px 8px #1976d244;
 }
+
 .subitem-row {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 0.95em;
 }
+
 .completed {
   text-decoration: line-through;
   color: #bbb;
 }
+
 .tooltip {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .tooltip .tooltip-text {
   visibility: hidden;
   width: max-content;
@@ -379,6 +442,7 @@ const imagesForDisplay = computed(() => {
   white-space: nowrap;
   box-shadow: 0 2px 8px #0002;
 }
+
 .tooltip:hover .tooltip-text {
   visibility: visible;
   opacity: 1;

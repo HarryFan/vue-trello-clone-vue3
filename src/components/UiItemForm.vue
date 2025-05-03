@@ -6,7 +6,7 @@
     </div>
     <div class="form-group">
       <label>描述</label>
-      <textarea v-model="form.description" placeholder="請輸入描述"></textarea>
+      <textarea v-model="form.description" placeholder="請輸入描述" rows="5" style="min-height: 100px;"></textarea>
     </div>
     <div class="form-group">
       <label>任務截止日期</label>

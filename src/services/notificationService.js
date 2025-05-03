@@ -196,12 +196,20 @@ export class NotificationService {
       if (data && data.length > 0) {
         console.log(`找到 ${data.length} 個即將到期任務`)
         data.forEach(task => {
+          // 準備通知內容
+          const title = '任務即將到期'
+          
+          // 格式化描述內容，包含任務標題、描述(如果有)、所屬清單和截止時間
+          const taskDescription = task.description ? `\n${task.description}` : ''
+          const formattedDeadline = this.formatDeadline(task.deadline)
+          
+          // 處理清單顯示，API 可能返回 list_title 或 listTitle
+          const listTitle = task.list_title || task.listTitle || '未分類'
+          
+          const body = `${task.title}${taskDescription}\n\n清單：${listTitle}\n到期時間：${formattedDeadline}`
+          
           // 無論瀏覽器通知設定如何，都顯示頁面內通知
-          this.createInPageNotification(
-            '任務即將到期', 
-            `${task.title} (在 ${task.list_title} 清單中) 將於 ${this.formatDeadline(task.deadline)} 到期`,
-            task
-          )
+          this.createInPageNotification(title, body, task)
           
           // 如果啟用了瀏覽器通知，嘗試顯示瀏覽器通知
           if (this.notificationPreference.browser) {
@@ -220,80 +228,46 @@ export class NotificationService {
   async showNotification(task) {
     console.log('嘗試顯示通知:', task)
     
-    // 先顯示頁面內通知，確保用戶能看到提醒
-    this.createInPageNotification('任務即將到期', `${task.title} (在 ${task.list_title} 清單中) 將於 ${this.formatDeadline(task.deadline)} 到期`, task)
-    
-    // 如果沒有瀏覽器通知權限，就直接返回了
-    if (Notification.permission !== 'granted') {
-      console.log('無瀏覽器通知權限，僅顯示頁面內通知')
-      return
-    }
-    
+    // 準備通知內容
     const title = '任務即將到期'
-    const body = `${task.title} (在 ${task.list_title} 清單中) 將於 ${this.formatDeadline(task.deadline)} 到期`
     
-    const notificationOptions = {
-      body: body,
-      icon: '/favicon.ico', // 使用現有的網站圖示
-      tag: `task-${task.id}`, // 避免重複通知
-      requireInteraction: true // 要求使用者互動才會關閉
-    }
-
-    try {
-      // 使用 try-catch 包裹通知創建
-      const notification = new Notification(title, notificationOptions)
-      console.log('通知已成功創建:', notification)
-
-      // 儲存通知記錄到 localStorage
-      this.saveNotificationLog({
-        title: title,
-        body: body,
-        data: {
-          boardId: task.board_id,
-          taskId: task.id,
-          deadline: task.deadline
+    // 格式化描述內容，包含任務標題、描述(如果有)、所屬清單和截止時間
+    const taskDescription = task.description ? `\n${task.description}` : ''
+    const formattedDeadline = this.formatDeadline(task.deadline)
+    
+    // 處理清單顯示，API 可能返回 list_title 或 listTitle
+    const listTitle = task.list_title || task.listTitle || '未分類'
+    
+    const body = `${task.title}${taskDescription}\n\n清單：${listTitle}\n到期時間：${formattedDeadline}`
+    
+    console.log('通知內容:', body)
+    
+    // 優先使用頁面內通知 (作為備用方案，確保用戶能看到通知)
+    this.createInPageNotification(title, body, task)
+    
+    // 嘗試發送瀏覽器通知
+    if (this.permission === 'granted') {
+      try {
+        const options = {
+          body: body,
+          icon: '/favicon.ico',
+          badge: '/favicon.ico',
+          silent: false,
+          requireInteraction: true
         }
-      })
-      
-      console.log(`已發送通知: ${title} - ${body}`)
-
-      // 點擊通知時的行為
-      notification.onclick = () => {
-        window.focus()
-        // 導航到對應的任務卡片
-        router.push(`/board/${task.board_id}?task=${task.id}`)
         
-        // 標記為已讀
-        const logIndex = this.notificationLogs.findIndex(
-          log => log.data.taskId === task.id && !log.read
-        )
-        if (logIndex !== -1) {
-          this.markAsRead(this.notificationLogs[logIndex].id)
-        }
+        const notification = new Notification(title, options)
+        console.log('通知已成功創建:', notification)
+        
+        // 紀錄通知
+        this.logNotification(task)
+        
+        console.log('已發送通知:', title + ' - ' + body)
+      } catch (error) {
+        console.error('顯示通知時發生錯誤:', error)
       }
-      
-      // 處理通知動作
-      navigator.serviceWorker.ready.then(function(registration) {
-        registration.addEventListener('notificationclick', function(event) {
-          if (event.action === 'view') {
-            window.focus()
-            router.push(`/board/${task.board_id}?task=${task.id}`)
-          }
-          event.notification.close()
-        })
-      }).catch(err => console.log('Service Worker 註冊失敗', err))
-    } catch (error) {
-      console.error('創建通知時發生錯誤:', error)
-      // 如果通知創建失敗，仍保存到日誌
-      this.saveNotificationLog({
-        title: title,
-        body: body + ' (通知創建失敗)',
-        data: {
-          boardId: task.board_id,
-          taskId: task.id,
-          deadline: task.deadline
-        }
-      })
+    } else {
+      console.log('通知權限未被授予，無法顯示瀏覽器通知')
     }
   }
   
@@ -310,7 +284,7 @@ export class NotificationService {
     container.style.borderRadius = '8px'
     container.style.boxShadow = '0 5px 15px rgba(0,0,0,0.15)'
     container.style.maxWidth = '320px'
-    container.style.cursor = 'pointer'
+    container.style.cursor = 'default' // 改為預設游標，因為按鈕有自己的游標
     container.style.transition = 'all 0.3s ease'
     container.style.borderLeft = '4px solid #4b97d2'
     container.style.fontFamily = 'Arial, sans-serif'
@@ -324,6 +298,9 @@ export class NotificationService {
       <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
     </svg>`;
     
+    // 格式化通知內容，使其更易閱讀
+    const formattedBody = body.replace(/\n/g, '<br>');
+    
     container.innerHTML = `
       <div style="display: flex; align-items: flex-start;">
         <div style="flex-grow: 1;">
@@ -331,8 +308,11 @@ export class NotificationService {
             ${bellIconSvg}
             ${title}
           </div>
-          <div style="font-size: 13px; color: #555; margin-left: 24px;">
-            ${body}
+          <div style="font-size: 13px; color: #555; margin-left: 24px; margin-bottom: 12px; line-height: 1.4;">
+            ${formattedBody}
+          </div>
+          <div style="display: flex; gap: 8px; margin-left: 24px;">
+            <button class="notification-ok-btn" style="background-color: #4b97d2; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">已讀</button>
           </div>
         </div>
         <div style="margin-left: 10px; color: #999; font-size: 16px; cursor: pointer;" class="notification-close">
@@ -352,42 +332,49 @@ export class NotificationService {
       container.style.transform = 'translateY(0)'
     }
     
-    container.onclick = () => {
-      document.body.removeChild(container)
-      router.push(`/board/${task.board_id}?task=${task.id}`)
-    }
-    
-    // 獲取關閉按鈕並添加點擊事件
-    setTimeout(() => {
-      const closeBtn = container.querySelector('.notification-close')
-      if (closeBtn) {
-        closeBtn.onclick = (e) => {
-          e.stopPropagation() // 阻止事件冒泡
-          document.body.removeChild(container)
-        }
-      }
-    }, 10)
-    
     // 添加淡入效果
     container.style.opacity = '0'
     setTimeout(() => {
       container.style.opacity = '1'
     }, 10)
     
-    // 8秒後自動消失
+    // 獲取按鈕並添加點擊事件
     setTimeout(() => {
-      if (document.body.contains(container)) {
-        container.style.opacity = '0'
-        container.style.transform = 'translateY(10px)'
-        setTimeout(() => {
-          if (document.body.contains(container)) {
-            document.body.removeChild(container)
-          }
-        }, 300)
+      // 已讀按鈕
+      const okBtn = container.querySelector('.notification-ok-btn')
+      if (okBtn) {
+        okBtn.onclick = () => {
+          // 添加淡出效果
+          container.style.opacity = '0'
+          container.style.transform = 'translateY(10px)'
+          setTimeout(() => {
+            if (document.body.contains(container)) {
+              document.body.removeChild(container)
+            }
+          }, 300)
+        }
       }
-    }, 8000)
+      
+      // 關閉按鈕
+      const closeBtn = container.querySelector('.notification-close')
+      if (closeBtn) {
+        closeBtn.onclick = (e) => {
+          e.stopPropagation() // 阻止事件冒泡
+          container.style.opacity = '0'
+          container.style.transform = 'translateY(10px)'
+          setTimeout(() => {
+            if (document.body.contains(container)) {
+              document.body.removeChild(container)
+            }
+          }, 300)
+        }
+      }
+    }, 10)
     
     document.body.appendChild(container)
+    
+    // 返回通知元素，以便外部可以控制它
+    return container
   }
 
   // 格式化截止日期
