@@ -220,14 +220,13 @@ export class NotificationService {
   async showNotification(task) {
     console.log('嘗試顯示通知:', task)
     
-    // 再次檢查權限
+    // 先顯示頁面內通知，確保用戶能看到提醒
+    this.createInPageNotification('任務即將到期', `${task.title} (在 ${task.list_title} 清單中) 將於 ${this.formatDeadline(task.deadline)} 到期`, task)
+    
+    // 如果沒有瀏覽器通知權限，就直接返回了
     if (Notification.permission !== 'granted') {
-      console.warn('無法顯示通知：未獲得權限')
-      const hasPermission = await this.checkPermission()
-      if (!hasPermission) {
-        console.error('獲取通知權限失敗，無法顯示通知')
-        return
-      }
+      console.log('無瀏覽器通知權限，僅顯示頁面內通知')
+      return
     }
     
     const title = '任務即將到期'
@@ -237,22 +236,7 @@ export class NotificationService {
       body: body,
       icon: '/favicon.ico', // 使用現有的網站圖示
       tag: `task-${task.id}`, // 避免重複通知
-      requireInteraction: true, // 要求使用者互動才會關閉
-      actions: [ // 在支援的瀏覽器中顯示按鈕
-        {
-          action: 'view',
-          title: '查看任務'
-        },
-        {
-          action: 'dismiss',
-          title: '稍後提醒'
-        }
-      ],
-      data: {
-        boardId: task.board_id,
-        taskId: task.id,
-        timestamp: new Date().toISOString()
-      }
+      requireInteraction: true // 要求使用者互動才會關閉
     }
 
     try {
@@ -272,9 +256,6 @@ export class NotificationService {
       })
       
       console.log(`已發送通知: ${title} - ${body}`)
-
-      // 同時創建一個備用的內部通知元素
-      this.createInPageNotification(title, body, task)
 
       // 點擊通知時的行為
       notification.onclick = () => {
