@@ -35,6 +35,9 @@ export const useAuthStore = defineStore('auth', {
           localStorage.setItem('trello_user', JSON.stringify(responseData.user))
           localStorage.setItem('trello_token', responseData.user.token)
           
+          // 觸發用戶已登入事件，啟動通知服務
+          document.dispatchEvent(new Event('userAuthenticated'))
+          
           return responseData.user
         } else {
           throw new Error(responseData.message || '登入回應格式不正確')
@@ -53,6 +56,9 @@ export const useAuthStore = defineStore('auth', {
       this.token = null
       localStorage.removeItem('trello_user')
       localStorage.removeItem('trello_token')
+      
+      // 觸發用戶已登出事件，停止通知服務
+      document.dispatchEvent(new Event('userLoggedOut'))
     }
   }
 })

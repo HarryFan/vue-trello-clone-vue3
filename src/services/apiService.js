@@ -41,6 +41,23 @@ export const initApi = async () => {
   }
 }
 
+// 通用 REST 方法
+export function get(url, config = {}) {
+  return api.get(url, config)
+}
+
+export function post(url, data = {}, config = {}) {
+  return api.post(url, data, config)
+}
+
+export function put(url, data = {}, config = {}) {
+  return api.put(url, data, config)
+}
+
+export function del(url, config = {}) {
+  return api.delete(url, config)
+}
+
 // 健康檢查
 export function healthCheck() {
   return api.get('api')
@@ -123,6 +140,12 @@ export function deleteCard(id) {
 }
 
 export default {
+  // 通用 REST 方法
+  get,
+  post,
+  put,
+  delete: del,
+  // 特定 API 方法
   login,
   getBoards,
   getBoard,
