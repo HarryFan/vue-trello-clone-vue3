@@ -1,62 +1,64 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { login as apiLogin } from '@/services/apiService'
+import { ref, computed } from 'vue'
+import apiService from '@/services/apiService'
 
-const TOKEN_KEY = 'trello_token'
-const USER_KEY = 'trello_user'
-const USER_ID_KEY = 'trello_user_id'
-
-export const useAuthStore = defineStore('auth', () => {
-  const token = ref(localStorage.getItem(TOKEN_KEY) || '')
-  const user = ref(JSON.parse(localStorage.getItem(USER_KEY) || 'null'))
-  const userId = ref(localStorage.getItem(USER_ID_KEY) || '')
-  const loading = ref(false)
-
-  const isAuthenticated = () => Boolean(token.value)
-
-  const login = async (email, password) => {
-    loading.value = true
-    try {
-      const res = await apiLogin({ email, password })
-      const userData = res.data
-
-      token.value = userData.token
-      user.value = {
-        id: userData.id,
-        email: userData.email,
-        name: userData.name
-      }
-      userId.value = userData.id.toString()
-
-      localStorage.setItem(TOKEN_KEY, userData.token)
-      localStorage.setItem(USER_KEY, JSON.stringify(user.value))
-      localStorage.setItem(USER_ID_KEY, userData.id.toString())
-
-      return user.value
-    } catch (err) {
-      console.error('[Auth] 登入失敗', err)
-      throw new Error(err.response?.data?.messages?.error || '登入失敗，請稍後再試')
-    } finally {
-      loading.value = false
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    user: JSON.parse(localStorage.getItem('trello_user')) || null,
+    token: localStorage.getItem('trello_token') || null,
+    loading: false,
+    error: null,
+  }),
+  
+  getters: {
+    isAuthenticated() {
+      return !!this.token && !!this.user
     }
-  }
-
-  const logout = () => {
-    token.value = ''
-    user.value = null
-    userId.value = ''
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(USER_KEY)
-    localStorage.removeItem(USER_ID_KEY)
-  }
-
-  return {
-    token,
-    user,
-    userId,
-    loading,
-    isAuthenticated,
-    login,
-    logout
+  },
+  
+  actions: {
+    async login(credentials) {
+      this.loading = true
+      this.error = null
+      
+      try {
+        const response = await apiService.login(credentials)
+        
+        // 修正：獲取正確的用戶數據和令牌
+        const responseData = response.data
+        
+        if (responseData.status === 'success' && responseData.user) {
+          // 從回應中正確提取用戶資料和令牌
+          this.user = responseData.user
+          this.token = responseData.user.token
+          
+          localStorage.setItem('trello_user', JSON.stringify(responseData.user))
+          localStorage.setItem('trello_token', responseData.user.token)
+          
+          // 觸發用戶已登入事件，啟動通知服務
+          document.dispatchEvent(new Event('userAuthenticated'))
+          
+          return responseData.user
+        } else {
+          throw new Error(responseData.message || '登入回應格式不正確')
+        }
+      } catch (error) {
+        this.error = error.response?.data?.message || error.message || '登入失敗，請確認帳號密碼'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    logout() {
+      // 清除使用者資訊和 token
+      this.user = null
+      this.token = null
+      localStorage.removeItem('trello_user')
+      localStorage.removeItem('trello_token')
+      
+      // 觸發用戶已登出事件，停止通知服務
+      document.dispatchEvent(new Event('userLoggedOut'))
+    }
   }
 })

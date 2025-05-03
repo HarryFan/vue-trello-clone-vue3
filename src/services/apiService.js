@@ -1,5 +1,4 @@
 /**
- * API Service
  * Trello Clone 專用，根據 api_spec.md 統一封裝所有 RESTful 請求。
  * - 命名與參數設計遵循 camelCase，JSDoc 標註。
  * - 方便切換 baseURL，維護與擴展。
@@ -7,59 +6,62 @@
  */
 import axios from 'axios'
 
-// 這裡將 baseURL 改為本機 CI4 API 位置
-const baseURL = 'http://localhost:8890/'
+// 從環境變數取得 API 基礎 URL
+const DEFAULT_BASE_URL = 'http://localhost:8085/'
+const baseURL = import.meta.env.VITE_API_BASE_URL || DEFAULT_BASE_URL
 
-const api = axios.create({
+// 先創建一個使用預設 URL 的 axios 實例
+let api = axios.create({
   baseURL,
   timeout: 10000,
+  withCredentials: false, // 改為 false 避免 CORS 憑證問題
   headers: {
     'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest'
+    'Accept': 'application/json',
   },
-  withCredentials: true
 })
 
-// 添加請求攔截器，自動添加 token 和 user id
+// 添加請求攔截器，自動添加 token
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('trello_token')
-  const userId = localStorage.getItem('trello_user_id')
-
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
-  if (userId) {
-    config.headers['X-User-Id'] = userId
-  }
   return config
-}, error => {
-  console.error('API 請求配置錯誤:', error)
-  return Promise.reject(error)
 })
 
-// 添加響應攔截器，處理錯誤
-api.interceptors.response.use(response => {
-  return response
-}, error => {
-  if (error.response) {
-    // 伺服器回應錯誤
-    console.error('API 錯誤:', error.response.data)
-    if (error.response.status === 401) {
-      // 未授權，清除本地存儲並重新導向到登入頁
-      localStorage.removeItem('trello_token')
-      localStorage.removeItem('trello_user')
-      localStorage.removeItem('trello_user_id')
-      window.location.href = '/login'
-    }
-  } else if (error.request) {
-    // 請求未收到回應
-    console.error('API 無回應:', error.request)
-  } else {
-    // 請求配置錯誤
-    console.error('API 請求錯誤:', error.message)
+// 初始化函數，直接使用環境變數中的 URL
+export const initApi = async () => {
+  try {
+    console.log('初始化 API，使用 baseURL:', baseURL)
+    return api
+  } catch (error) {
+    console.error('初始化 API 失敗', error)
+    return api
   }
-  return Promise.reject(error)
-})
+}
+
+// 通用 REST 方法
+export function get(url, config = {}) {
+  return api.get(url, config)
+}
+
+export function post(url, data = {}, config = {}) {
+  return api.post(url, data, config)
+}
+
+export function put(url, data = {}, config = {}) {
+  return api.put(url, data, config)
+}
+
+export function del(url, config = {}) {
+  return api.delete(url, config)
+}
+
+// 健康檢查
+export function healthCheck() {
+  return api.get('api')
+}
 
 // Auth
 export function login(data) {
@@ -70,18 +72,23 @@ export function login(data) {
 export function getBoards() {
   return api.get('boards')
 }
+
 export function getBoard(id) {
   return api.get(`boards/${id}`)
 }
+
 export function createBoard(data) {
   return api.post('boards', data)
 }
+
 export function updateBoard(id, data) {
   return api.put(`boards/${id}`, data)
 }
+
 export function deleteBoard(id) {
   return api.delete(`boards/${id}`)
 }
+
 /**
  * 重設看板為預設狀態
  * @param {number} boardId
@@ -94,15 +101,19 @@ export function resetBoard(boardId) {
 export function getLists(boardId) {
   return api.get(`boards/${boardId}/lists`)
 }
+
 export function getList(id) {
   return api.get(`lists/${id}`)
 }
-export function createList(boardId, data) {
-  return api.post(`boards/${boardId}/lists`, data)
+
+export function createList(boardId, listData) {
+  return api.post(`boards/${boardId}/lists`, listData)
 }
+
 export function updateList(id, data) {
   return api.put(`lists/${id}`, data)
 }
+
 export function deleteList(id) {
   return api.delete(`lists/${id}`)
 }
@@ -111,37 +122,30 @@ export function deleteList(id) {
 export function getCards(listId) {
   return api.get(`lists/${listId}/cards`)
 }
+
 export function getCard(id) {
   return api.get(`cards/${id}`)
 }
-export function createCard(listId, data) {
-  return api.post(`lists/${listId}/cards`, {
-    ...data,
-    list_id: listId
-  })
+
+export function createCard(listId, cardData) {
+  return api.post(`lists/${listId}/cards`, cardData)
 }
+
 export function updateCard(id, data) {
   return api.put(`cards/${id}`, data)
 }
+
 export function deleteCard(id) {
   return api.delete(`cards/${id}`)
 }
 
-// 通知相關
-export function getUpcomingTasks() {
-  return api.get('notifications/upcoming')
-}
-
-// 健康檢查
-/**
- * 呼叫後端 API 健康檢查
- * @returns {Promise}
- */
-export function healthCheck() {
-  return api.get('api')
-}
-
 export default {
+  // 通用 REST 方法
+  get,
+  post,
+  put,
+  delete: del,
+  // 特定 API 方法
   login,
   getBoards,
   getBoard,
@@ -159,6 +163,6 @@ export default {
   createCard,
   updateCard,
   deleteCard,
-  getUpcomingTasks,
-  healthCheck,
+  initApi,
+  healthCheck
 }

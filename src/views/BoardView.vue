@@ -60,7 +60,8 @@
         <textarea v-model="addCardDialog.description" placeholder="描述 (選填)" style="padding:8px 10px;border-radius:6px;border:1.5px solid #e3f0fd;font-size:1em;min-height:60px;resize:vertical;"></textarea>
         <div style="display:flex;align-items:center;gap:8px;">
           <label style="font-size:0.98em;">任務截止日期</label>
-          <input v-model="addCardDialog.date" type="date" style="padding:6px 10px;border-radius:6px;border:1.5px solid #e3f0fd;font-size:1em;" />
+          <input v-model="addCardDialog.date" type="datetime-local" style="padding:6px 10px;border-radius:6px;border:1.5px solid #e3f0fd;font-size:1em;" />
+          <div class="hint" style="font-size:12px;color:#666;margin-left:4px;">選擇精確到分鐘的截止時間</div>
         </div>
         <div style="display:flex;gap:12px;justify-content:flex-end;">
           <button type="button" class="primary" @click="submitAddCard">確定</button>

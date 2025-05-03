@@ -100,13 +100,31 @@
         },
         {
           "name": "formatDeadline",
-          "jsdoc": "/**\n * 卡片組件 Card.vue\n * 顯示單一任務卡片內容，包含標題、描述、細項、日期與操作 icon。\n * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。\n * - 支援編輯、刪除、細項切換等互動。\n * @module Card\n * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、細項等。\n * @prop {String} listTitle - 所屬清單名稱。\n * @event edit - 點擊編輯 icon 時發出，傳遞 item。\n * @event delete - 點擊刪除 icon 時發出，傳遞 item。\n * @event update - 細項勾選時發出，傳遞更新後的 item。\n */\nimport { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'\nimport { computed } from 'vue'\nconst emit = defineEmits(['edit', 'delete', 'update'])\nconst props = defineProps({\n  /**\n   * 任務卡片資料物件\n   * @type {Object}\n   */\n  item: {\n    type: Object,\n    required: true\n  },\n  /**\n   * 所屬清單名稱\n   * @type {String}\n   */\n  listTitle: {\n    type: String,\n    required: true\n  }\n})\n\n/**\n * 卡片狀態 class 計算屬性\n * - is-due: 即將到期\n * - is-overdue: 已逾期\n * - completed-card: 已完成\n */\nconst cardClasses = computed(() => ({\n  'is-due': isDue.value,\n  'is-overdue': isOverdue.value,\n  'completed-card': props.listTitle === '完成'\n}))\n\n/**\n * 取得日期 timestamp\n * @returns {number}\n */\nconst timestamp = computed(() => Number(new Date(props.item.deadline)))\n\n/**\n * 是否逾期\n * @returns {boolean}\n */\nconst isOverdue = computed(() => timestamp.value && timestamp.value < Date.now())\n\n/**\n * 是否進入即將到期區間（3天內）\n * @returns {boolean}\n */\nconst isDue = computed(() => {\n  const date = timestamp.value\n  const due = date - (1000 * 60 * 60 * 24) * 3\n  const now = Date.now()\n  return date > now && now > due\n})\n\n/**\n * 計算距離截止日剩餘小時數\n * @returns {number|null}\n */\nfunction getHoursLeft() {\n  if (!props.item.deadline) return null\n  const deadline = new Date(props.item.deadline).getTime()\n  const now = Date.now()\n  const diff = deadline - now\n  if (diff <= 0) return 0\n  return Math.ceil(diff / (1000 * 60 * 60))\n}\n\n/**\n * 發送編輯事件\n * @fires edit\n */\nfunction emitEdit() {\n  emit('edit', props.item)\n}\n/**\n * 發送刪除事件\n * @fires delete\n */\nfunction emitDelete() {\n  emit('delete', props.item)\n}\n/**\n * 將 created_at 格式 \"2025-05-02 11:17:49\" 轉為 \"2025/05/02 11:17\"\n * 支援後端回傳的 SQL DATETIME 格式\n * @param {string} createdAt\n * @returns {string}\n */\nfunction formatCreatedAt(createdAt) {\n  if (!createdAt) return ''\n  // 修正 SQL DATETIME 格式為 JS 標準格式\n  const normalized = createdAt.replace(' ', 'T')\n  const d = new Date(normalized)\n  if (isNaN(d.getTime())) return createdAt // 若解析失敗，直接回傳原字串\n  const yyyy = d.getFullYear()\n  const mm = (d.getMonth() + 1).toString().padStart(2, '0')\n  const dd = d.getDate().toString().padStart(2, '0')\n  const hh = d.getHours().toString().padStart(2, '0')\n  const min = d.getMinutes().toString().padStart(2, '0')\n  return `${yyyy}/${mm}/${dd} ${hh}:${min}`\n}\n\n/**\n * 將 deadline 格式化為 \"YYYY/MM/DD HH:mm\" 格式\n * @param {string} deadline\n * @returns {string}\n */",
+          "jsdoc": "/**\n * 卡片組件 Card.vue\n * 顯示單一任務卡片內容，包含標題、描述、細項、日期與操作 icon。\n * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。\n * - 支援編輯、刪除、細項切換等互動。\n * @module Card\n * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、細項等。\n * @prop {String} listTitle - 所屬清單名稱。\n * @event edit - 點擊編輯 icon 時發出，傳遞 item。\n * @event delete - 點擊刪除 icon 時發出，傳遞 item。\n * @event update - 細項勾選時發出，傳遞更新後的 item。\n */\nimport { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'\nimport { computed } from 'vue'\nconst emit = defineEmits(['edit', 'delete', 'update'])\nconst props = defineProps({\n  /**\n   * 任務卡片資料物件\n   * @type {Object}\n   */\n  item: {\n    type: Object,\n    required: true\n  },\n  /**\n   * 所屬清單名稱\n   * @type {String}\n   */\n  listTitle: {\n    type: String,\n    required: true\n  }\n})\n\n/**\n * 卡片狀態 class 計算屬性\n * - is-due: 即將到期\n * - is-overdue: 已逾期\n * - completed-card: 已完成\n */\nconst cardClasses = computed(() => ({\n  'is-due': isDue.value,\n  'is-overdue': isOverdue.value,\n  'completed-card': props.listTitle === '完成'\n}))\n\n/**\n * 取得日期 timestamp\n * @returns {number}\n */\nconst timestamp = computed(() => Number(new Date(props.item.deadline)))\n\n/**\n * 是否逾期\n * @returns {boolean}\n */\nconst isOverdue = computed(() => timestamp.value && timestamp.value < Date.now())\n\n/**\n * 是否進入即將到期區間（3天內）\n * @returns {boolean}\n */\nconst isDue = computed(() => {\n  const date = timestamp.value\n  const due = date - (1000 * 60 * 60 * 24) * 3\n  const now = Date.now()\n  return date > now && now > due\n})\n\n/**\n * 計算距離截止日剩餘小時數\n * @returns {number|null}\n */\nfunction getHoursLeft() {\n  if (!props.item.deadline) return null\n  const deadline = new Date(props.item.deadline).getTime()\n  const now = Date.now()\n  const diff = deadline - now\n  if (diff <= 0) return 0\n  return Math.ceil(diff / (1000 * 60 * 60))\n}\n\n/**\n * 發送編輯事件\n * @fires edit\n */\nfunction emitEdit() {\n  emit('edit', props.item)\n}\n/**\n * 發送刪除事件\n * @fires delete\n */\nfunction emitDelete() {\n  emit('delete', props.item)\n}\n/**\n * 將 created_at 格式 \"2025-05-02 11:17:49\" 轉為 \"2025/05/02 11:17\"\n * 支援後端回傳的 SQL DATETIME 格式\n * @param {string} createdAt\n * @returns {string}\n */\nfunction formatCreatedAt(createdAt) {\n  if (!createdAt) return ''\n  \n  try {\n    // 標準化日期字串，確保能被 Date 物件正確解析\n    // 先將日期字串標準化為 ISO 格式\n    const normalized = createdAt.replace(' ', 'T')\n    \n    // 將本地日期轉換為 Date 物件\n    const d = new Date(normalized)\n    \n    // 檢查日期是否有效\n    if (isNaN(d.getTime())) {\n      console.warn('無效的日期格式', createdAt)\n      return createdAt || ''\n    }\n    \n    // 格式化為 2025/05/02 11:17 格式\n    const yyyy = d.getFullYear()\n    const mm = (d.getMonth() + 1).toString().padStart(2, '0')\n    const dd = d.getDate().toString().padStart(2, '0')\n    const hh = d.getHours().toString().padStart(2, '0')\n    const min = d.getMinutes().toString().padStart(2, '0')\n    \n    return `${yyyy}/${mm}/${dd} ${hh}:${min}`\n  } catch (e) {\n    console.error('日期格式化錯誤', e)\n    return createdAt || ''\n  }\n}\n\n/**\n * 將 deadline 格式化為 \"YYYY/MM/DD HH:mm\" 格式（包含時間）\n * @param {string} deadline\n * @returns {string}\n */",
           "inputs": [],
           "output": null
         },
         {
           "name": "toggleSubItem",
-          "jsdoc": "/**\n * 卡片組件 Card.vue\n * 顯示單一任務卡片內容，包含標題、描述、細項、日期與操作 icon。\n * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。\n * - 支援編輯、刪除、細項切換等互動。\n * @module Card\n * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、細項等。\n * @prop {String} listTitle - 所屬清單名稱。\n * @event edit - 點擊編輯 icon 時發出，傳遞 item。\n * @event delete - 點擊刪除 icon 時發出，傳遞 item。\n * @event update - 細項勾選時發出，傳遞更新後的 item。\n */\nimport { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'\nimport { computed } from 'vue'\nconst emit = defineEmits(['edit', 'delete', 'update'])\nconst props = defineProps({\n  /**\n   * 任務卡片資料物件\n   * @type {Object}\n   */\n  item: {\n    type: Object,\n    required: true\n  },\n  /**\n   * 所屬清單名稱\n   * @type {String}\n   */\n  listTitle: {\n    type: String,\n    required: true\n  }\n})\n\n/**\n * 卡片狀態 class 計算屬性\n * - is-due: 即將到期\n * - is-overdue: 已逾期\n * - completed-card: 已完成\n */\nconst cardClasses = computed(() => ({\n  'is-due': isDue.value,\n  'is-overdue': isOverdue.value,\n  'completed-card': props.listTitle === '完成'\n}))\n\n/**\n * 取得日期 timestamp\n * @returns {number}\n */\nconst timestamp = computed(() => Number(new Date(props.item.deadline)))\n\n/**\n * 是否逾期\n * @returns {boolean}\n */\nconst isOverdue = computed(() => timestamp.value && timestamp.value < Date.now())\n\n/**\n * 是否進入即將到期區間（3天內）\n * @returns {boolean}\n */\nconst isDue = computed(() => {\n  const date = timestamp.value\n  const due = date - (1000 * 60 * 60 * 24) * 3\n  const now = Date.now()\n  return date > now && now > due\n})\n\n/**\n * 計算距離截止日剩餘小時數\n * @returns {number|null}\n */\nfunction getHoursLeft() {\n  if (!props.item.deadline) return null\n  const deadline = new Date(props.item.deadline).getTime()\n  const now = Date.now()\n  const diff = deadline - now\n  if (diff <= 0) return 0\n  return Math.ceil(diff / (1000 * 60 * 60))\n}\n\n/**\n * 發送編輯事件\n * @fires edit\n */\nfunction emitEdit() {\n  emit('edit', props.item)\n}\n/**\n * 發送刪除事件\n * @fires delete\n */\nfunction emitDelete() {\n  emit('delete', props.item)\n}\n/**\n * 將 created_at 格式 \"2025-05-02 11:17:49\" 轉為 \"2025/05/02 11:17\"\n * 支援後端回傳的 SQL DATETIME 格式\n * @param {string} createdAt\n * @returns {string}\n */\nfunction formatCreatedAt(createdAt) {\n  if (!createdAt) return ''\n  // 修正 SQL DATETIME 格式為 JS 標準格式\n  const normalized = createdAt.replace(' ', 'T')\n  const d = new Date(normalized)\n  if (isNaN(d.getTime())) return createdAt // 若解析失敗，直接回傳原字串\n  const yyyy = d.getFullYear()\n  const mm = (d.getMonth() + 1).toString().padStart(2, '0')\n  const dd = d.getDate().toString().padStart(2, '0')\n  const hh = d.getHours().toString().padStart(2, '0')\n  const min = d.getMinutes().toString().padStart(2, '0')\n  return `${yyyy}/${mm}/${dd} ${hh}:${min}`\n}\n\n/**\n * 將 deadline 格式化為 \"YYYY/MM/DD HH:mm\" 格式\n * @param {string} deadline\n * @returns {string}\n */\nfunction formatDeadline(deadline) {\n  if (!deadline) return ''\n  const normalized = deadline.replace(' ', 'T')\n  const d = new Date(normalized)\n  if (isNaN(d.getTime())) return deadline\n  const yyyy = d.getFullYear()\n  const mm = (d.getMonth() + 1).toString().padStart(2, '0')\n  const dd = d.getDate().toString().padStart(2, '0')\n  const hh = d.getHours().toString().padStart(2, '0')\n  const min = d.getMinutes().toString().padStart(2, '0')\n  return `${yyyy}/${mm}/${dd} ${hh}:${min}`\n}\n\n/**\n * 細項勾選切換，發送 update 事件\n * @param {number} idx - 細項索引\n * @fires update\n */",
+          "jsdoc": "/**\n * 卡片組件 Card.vue\n * 顯示單一任務卡片內容，包含標題、描述、細項、日期與操作 icon。\n * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。\n * - 支援編輯、刪除、細項切換等互動。\n * @module Card\n * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、細項等。\n * @prop {String} listTitle - 所屬清單名稱。\n * @event edit - 點擊編輯 icon 時發出，傳遞 item。\n * @event delete - 點擊刪除 icon 時發出，傳遞 item。\n * @event update - 細項勾選時發出，傳遞更新後的 item。\n */\nimport { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'\nimport { computed } from 'vue'\nconst emit = defineEmits(['edit', 'delete', 'update'])\nconst props = defineProps({\n  /**\n   * 任務卡片資料物件\n   * @type {Object}\n   */\n  item: {\n    type: Object,\n    required: true\n  },\n  /**\n   * 所屬清單名稱\n   * @type {String}\n   */\n  listTitle: {\n    type: String,\n    required: true\n  }\n})\n\n/**\n * 卡片狀態 class 計算屬性\n * - is-due: 即將到期\n * - is-overdue: 已逾期\n * - completed-card: 已完成\n */\nconst cardClasses = computed(() => ({\n  'is-due': isDue.value,\n  'is-overdue': isOverdue.value,\n  'completed-card': props.listTitle === '完成'\n}))\n\n/**\n * 取得日期 timestamp\n * @returns {number}\n */\nconst timestamp = computed(() => Number(new Date(props.item.deadline)))\n\n/**\n * 是否逾期\n * @returns {boolean}\n */\nconst isOverdue = computed(() => timestamp.value && timestamp.value < Date.now())\n\n/**\n * 是否進入即將到期區間（3天內）\n * @returns {boolean}\n */\nconst isDue = computed(() => {\n  const date = timestamp.value\n  const due = date - (1000 * 60 * 60 * 24) * 3\n  const now = Date.now()\n  return date > now && now > due\n})\n\n/**\n * 計算距離截止日剩餘小時數\n * @returns {number|null}\n */\nfunction getHoursLeft() {\n  if (!props.item.deadline) return null\n  const deadline = new Date(props.item.deadline).getTime()\n  const now = Date.now()\n  const diff = deadline - now\n  if (diff <= 0) return 0\n  return Math.ceil(diff / (1000 * 60 * 60))\n}\n\n/**\n * 發送編輯事件\n * @fires edit\n */\nfunction emitEdit() {\n  emit('edit', props.item)\n}\n/**\n * 發送刪除事件\n * @fires delete\n */\nfunction emitDelete() {\n  emit('delete', props.item)\n}\n/**\n * 將 created_at 格式 \"2025-05-02 11:17:49\" 轉為 \"2025/05/02 11:17\"\n * 支援後端回傳的 SQL DATETIME 格式\n * @param {string} createdAt\n * @returns {string}\n */\nfunction formatCreatedAt(createdAt) {\n  if (!createdAt) return ''\n  \n  try {\n    // 標準化日期字串，確保能被 Date 物件正確解析\n    // 先將日期字串標準化為 ISO 格式\n    const normalized = createdAt.replace(' ', 'T')\n    \n    // 將本地日期轉換為 Date 物件\n    const d = new Date(normalized)\n    \n    // 檢查日期是否有效\n    if (isNaN(d.getTime())) {\n      console.warn('無效的日期格式', createdAt)\n      return createdAt || ''\n    }\n    \n    // 格式化為 2025/05/02 11:17 格式\n    const yyyy = d.getFullYear()\n    const mm = (d.getMonth() + 1).toString().padStart(2, '0')\n    const dd = d.getDate().toString().padStart(2, '0')\n    const hh = d.getHours().toString().padStart(2, '0')\n    const min = d.getMinutes().toString().padStart(2, '0')\n    \n    return `${yyyy}/${mm}/${dd} ${hh}:${min}`\n  } catch (e) {\n    console.error('日期格式化錯誤', e)\n    return createdAt || ''\n  }\n}\n\n/**\n * 將 deadline 格式化為 \"YYYY/MM/DD HH:mm\" 格式（包含時間）\n * @param {string} deadline\n * @returns {string}\n */\nfunction formatDeadline(deadline) {\n  if (!deadline) return ''\n  \n  try {\n    // 嘗試處理不同的日期格式\n    // 如果日期只有 YYYY-MM-DD 格式，無需轉換為 ISO\n    let d;\n    \n    if (deadline.includes('T') || deadline.includes(' ')) {\n      // 包含時間的日期格式 (YYYY-MM-DD HH:MM:SS 或 ISO)\n      const normalized = deadline.replace(' ', 'T')\n      d = new Date(normalized)\n    } else {\n      // 純日期格式 (YYYY-MM-DD)\n      d = new Date(deadline)\n    }\n    \n    // 檢查日期是否有效\n    if (isNaN(d.getTime())) {\n      console.warn('無效的截止日期格式', deadline)\n      return deadline\n    }\n    \n    // 對截止日期顯示完整的日期和時間\n    const yyyy = d.getFullYear()\n    const mm = (d.getMonth() + 1).toString().padStart(2, '0')\n    const dd = d.getDate().toString().padStart(2, '0')\n    const hh = d.getHours().toString().padStart(2, '0')\n    const min = d.getMinutes().toString().padStart(2, '0')\n    \n    return `${yyyy}/${mm}/${dd} ${hh}:${min}`\n  } catch (e) {\n    console.error('截止日期格式化錯誤', e)\n    return deadline || ''\n  }\n}\n/**\n * 細項勾選切換，發送 update 事件\n * @param {number} idx - 細項索引\n * @fires update\n */",
+          "inputs": [],
+          "output": null
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "path": "components/NotificationSettings.vue",
+      "functions": [
+        {
+          "name": "testEmail",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "saveSettings",
+          "jsdoc": "// 載入現有設定\nonMounted(() => {\n  const savedPrefs = notificationService.loadPreferences()\n  Object.assign(preferences, savedPrefs)\n  \n  if (authStore.user?.email) {\n    emailAddress.value = authStore.user.email\n  }\n})\n\nconst isValidEmail = computed(() => {\n  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/\n  return emailRegex.test(emailAddress.value)\n})\n\nasync function testEmail() {\n  if (!isValidEmail.value) return\n  \n  try {\n    emailMessage.value = '正在發送測試郵件...'\n    emailStatus.value = 'pending'\n    \n    await notificationService.testEmail(emailAddress.value)\n    \n    emailMessage.value = '測試郵件已發送，請檢查您的郵箱'\n    emailStatus.value = 'success'\n  } catch (error) {\n    emailMessage.value = `發送失敗: ${error.message}`\n    emailStatus.value = 'error'\n  }\n}",
           "inputs": [],
           "output": null
         }
@@ -340,6 +358,36 @@
       "path": "services/apiService.js",
       "functions": [
         {
+          "name": "get",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "post",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "put",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "del",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
+          "name": "healthCheck",
+          "jsdoc": "",
+          "inputs": [],
+          "output": null
+        },
+        {
           "name": "login",
           "jsdoc": "",
           "inputs": [],
@@ -440,14 +488,13 @@
           "jsdoc": "",
           "inputs": [],
           "output": null
-        },
-        {
-          "name": "healthCheck",
-          "jsdoc": "",
-          "inputs": [],
-          "output": null
         }
       ]
+    },
+    {
+      "type": "file",
+      "path": "services/notificationService.js",
+      "functions": []
     },
     {
       "type": "file",
@@ -491,11 +538,25 @@
         },
         {
           "name": "formatDeadline",
-          "jsdoc": "/**\n * 卡片組件 Card.vue\n * 顯示單一任務卡片內容，包含標題、描述、細項、日期與操作 icon。\n * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。\n * - 支援編輯、刪除、細項切換等互動。\n * @module Card\n * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、細項等。\n * @prop {String} listTitle - 所屬清單名稱。\n * @event edit - 點擊編輯 icon 時發出，傳遞 item。\n * @event delete - 點擊刪除 icon 時發出，傳遞 item。\n * @event update - 細項勾選時發出，傳遞更新後的 item。\n */\nimport { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'\nimport { computed } from 'vue'\nconst emit = defineEmits(['edit', 'delete', 'update'])\nconst props = defineProps({\n  /**\n   * 任務卡片資料物件\n   * @type {Object}\n   */\n  item: {\n    type: Object,\n    required: true\n  },\n  /**\n   * 所屬清單名稱\n   * @type {String}\n   */\n  listTitle: {\n    type: String,\n    required: true\n  }\n})\n\n/**\n * 卡片狀態 class 計算屬性\n * - is-due: 即將到期\n * - is-overdue: 已逾期\n * - completed-card: 已完成\n */\nconst cardClasses = computed(() => ({\n  'is-due': isDue.value,\n  'is-overdue': isOverdue.value,\n  'completed-card': props.listTitle === '完成'\n}))\n\n/**\n * 取得日期 timestamp\n * @returns {number}\n */\nconst timestamp = computed(() => Number(new Date(props.item.deadline)))\n\n/**\n * 是否逾期\n * @returns {boolean}\n */\nconst isOverdue = computed(() => timestamp.value && timestamp.value < Date.now())\n\n/**\n * 是否進入即將到期區間（3天內）\n * @returns {boolean}\n */\nconst isDue = computed(() => {\n  const date = timestamp.value\n  const due = date - (1000 * 60 * 60 * 24) * 3\n  const now = Date.now()\n  return date > now && now > due\n})\n\n/**\n * 計算距離截止日剩餘小時數\n * @returns {number|null}\n */\nfunction getHoursLeft() {\n  if (!props.item.deadline) return null\n  const deadline = new Date(props.item.deadline).getTime()\n  const now = Date.now()\n  const diff = deadline - now\n  if (diff <= 0) return 0\n  return Math.ceil(diff / (1000 * 60 * 60))\n}\n\n/**\n * 發送編輯事件\n * @fires edit\n */\nfunction emitEdit() {\n  emit('edit', props.item)\n}\n/**\n * 發送刪除事件\n * @fires delete\n */\nfunction emitDelete() {\n  emit('delete', props.item)\n}\n/**\n * 將 created_at 格式 \"2025-05-02 11:17:49\" 轉為 \"2025/05/02 11:17\"\n * 支援後端回傳的 SQL DATETIME 格式\n * @param {string} createdAt\n * @returns {string}\n */\nfunction formatCreatedAt(createdAt) {\n  if (!createdAt) return ''\n  // 修正 SQL DATETIME 格式為 JS 標準格式\n  const normalized = createdAt.replace(' ', 'T')\n  const d = new Date(normalized)\n  if (isNaN(d.getTime())) return createdAt // 若解析失敗，直接回傳原字串\n  const yyyy = d.getFullYear()\n  const mm = (d.getMonth() + 1).toString().padStart(2, '0')\n  const dd = d.getDate().toString().padStart(2, '0')\n  const hh = d.getHours().toString().padStart(2, '0')\n  const min = d.getMinutes().toString().padStart(2, '0')\n  return `${yyyy}/${mm}/${dd} ${hh}:${min}`\n}\n\n/**\n * 將 deadline 格式化為 \"YYYY/MM/DD HH:mm\" 格式\n * @param {string} deadline\n * @returns {string}\n */"
+          "jsdoc": "/**\n * 卡片組件 Card.vue\n * 顯示單一任務卡片內容，包含標題、描述、細項、日期與操作 icon。\n * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。\n * - 支援編輯、刪除、細項切換等互動。\n * @module Card\n * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、細項等。\n * @prop {String} listTitle - 所屬清單名稱。\n * @event edit - 點擊編輯 icon 時發出，傳遞 item。\n * @event delete - 點擊刪除 icon 時發出，傳遞 item。\n * @event update - 細項勾選時發出，傳遞更新後的 item。\n */\nimport { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'\nimport { computed } from 'vue'\nconst emit = defineEmits(['edit', 'delete', 'update'])\nconst props = defineProps({\n  /**\n   * 任務卡片資料物件\n   * @type {Object}\n   */\n  item: {\n    type: Object,\n    required: true\n  },\n  /**\n   * 所屬清單名稱\n   * @type {String}\n   */\n  listTitle: {\n    type: String,\n    required: true\n  }\n})\n\n/**\n * 卡片狀態 class 計算屬性\n * - is-due: 即將到期\n * - is-overdue: 已逾期\n * - completed-card: 已完成\n */\nconst cardClasses = computed(() => ({\n  'is-due': isDue.value,\n  'is-overdue': isOverdue.value,\n  'completed-card': props.listTitle === '完成'\n}))\n\n/**\n * 取得日期 timestamp\n * @returns {number}\n */\nconst timestamp = computed(() => Number(new Date(props.item.deadline)))\n\n/**\n * 是否逾期\n * @returns {boolean}\n */\nconst isOverdue = computed(() => timestamp.value && timestamp.value < Date.now())\n\n/**\n * 是否進入即將到期區間（3天內）\n * @returns {boolean}\n */\nconst isDue = computed(() => {\n  const date = timestamp.value\n  const due = date - (1000 * 60 * 60 * 24) * 3\n  const now = Date.now()\n  return date > now && now > due\n})\n\n/**\n * 計算距離截止日剩餘小時數\n * @returns {number|null}\n */\nfunction getHoursLeft() {\n  if (!props.item.deadline) return null\n  const deadline = new Date(props.item.deadline).getTime()\n  const now = Date.now()\n  const diff = deadline - now\n  if (diff <= 0) return 0\n  return Math.ceil(diff / (1000 * 60 * 60))\n}\n\n/**\n * 發送編輯事件\n * @fires edit\n */\nfunction emitEdit() {\n  emit('edit', props.item)\n}\n/**\n * 發送刪除事件\n * @fires delete\n */\nfunction emitDelete() {\n  emit('delete', props.item)\n}\n/**\n * 將 created_at 格式 \"2025-05-02 11:17:49\" 轉為 \"2025/05/02 11:17\"\n * 支援後端回傳的 SQL DATETIME 格式\n * @param {string} createdAt\n * @returns {string}\n */\nfunction formatCreatedAt(createdAt) {\n  if (!createdAt) return ''\n  \n  try {\n    // 標準化日期字串，確保能被 Date 物件正確解析\n    // 先將日期字串標準化為 ISO 格式\n    const normalized = createdAt.replace(' ', 'T')\n    \n    // 將本地日期轉換為 Date 物件\n    const d = new Date(normalized)\n    \n    // 檢查日期是否有效\n    if (isNaN(d.getTime())) {\n      console.warn('無效的日期格式', createdAt)\n      return createdAt || ''\n    }\n    \n    // 格式化為 2025/05/02 11:17 格式\n    const yyyy = d.getFullYear()\n    const mm = (d.getMonth() + 1).toString().padStart(2, '0')\n    const dd = d.getDate().toString().padStart(2, '0')\n    const hh = d.getHours().toString().padStart(2, '0')\n    const min = d.getMinutes().toString().padStart(2, '0')\n    \n    return `${yyyy}/${mm}/${dd} ${hh}:${min}`\n  } catch (e) {\n    console.error('日期格式化錯誤', e)\n    return createdAt || ''\n  }\n}\n\n/**\n * 將 deadline 格式化為 \"YYYY/MM/DD HH:mm\" 格式（包含時間）\n * @param {string} deadline\n * @returns {string}\n */"
         },
         {
           "name": "toggleSubItem",
-          "jsdoc": "/**\n * 卡片組件 Card.vue\n * 顯示單一任務卡片內容，包含標題、描述、細項、日期與操作 icon。\n * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。\n * - 支援編輯、刪除、細項切換等互動。\n * @module Card\n * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、細項等。\n * @prop {String} listTitle - 所屬清單名稱。\n * @event edit - 點擊編輯 icon 時發出，傳遞 item。\n * @event delete - 點擊刪除 icon 時發出，傳遞 item。\n * @event update - 細項勾選時發出，傳遞更新後的 item。\n */\nimport { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'\nimport { computed } from 'vue'\nconst emit = defineEmits(['edit', 'delete', 'update'])\nconst props = defineProps({\n  /**\n   * 任務卡片資料物件\n   * @type {Object}\n   */\n  item: {\n    type: Object,\n    required: true\n  },\n  /**\n   * 所屬清單名稱\n   * @type {String}\n   */\n  listTitle: {\n    type: String,\n    required: true\n  }\n})\n\n/**\n * 卡片狀態 class 計算屬性\n * - is-due: 即將到期\n * - is-overdue: 已逾期\n * - completed-card: 已完成\n */\nconst cardClasses = computed(() => ({\n  'is-due': isDue.value,\n  'is-overdue': isOverdue.value,\n  'completed-card': props.listTitle === '完成'\n}))\n\n/**\n * 取得日期 timestamp\n * @returns {number}\n */\nconst timestamp = computed(() => Number(new Date(props.item.deadline)))\n\n/**\n * 是否逾期\n * @returns {boolean}\n */\nconst isOverdue = computed(() => timestamp.value && timestamp.value < Date.now())\n\n/**\n * 是否進入即將到期區間（3天內）\n * @returns {boolean}\n */\nconst isDue = computed(() => {\n  const date = timestamp.value\n  const due = date - (1000 * 60 * 60 * 24) * 3\n  const now = Date.now()\n  return date > now && now > due\n})\n\n/**\n * 計算距離截止日剩餘小時數\n * @returns {number|null}\n */\nfunction getHoursLeft() {\n  if (!props.item.deadline) return null\n  const deadline = new Date(props.item.deadline).getTime()\n  const now = Date.now()\n  const diff = deadline - now\n  if (diff <= 0) return 0\n  return Math.ceil(diff / (1000 * 60 * 60))\n}\n\n/**\n * 發送編輯事件\n * @fires edit\n */\nfunction emitEdit() {\n  emit('edit', props.item)\n}\n/**\n * 發送刪除事件\n * @fires delete\n */\nfunction emitDelete() {\n  emit('delete', props.item)\n}\n/**\n * 將 created_at 格式 \"2025-05-02 11:17:49\" 轉為 \"2025/05/02 11:17\"\n * 支援後端回傳的 SQL DATETIME 格式\n * @param {string} createdAt\n * @returns {string}\n */\nfunction formatCreatedAt(createdAt) {\n  if (!createdAt) return ''\n  // 修正 SQL DATETIME 格式為 JS 標準格式\n  const normalized = createdAt.replace(' ', 'T')\n  const d = new Date(normalized)\n  if (isNaN(d.getTime())) return createdAt // 若解析失敗，直接回傳原字串\n  const yyyy = d.getFullYear()\n  const mm = (d.getMonth() + 1).toString().padStart(2, '0')\n  const dd = d.getDate().toString().padStart(2, '0')\n  const hh = d.getHours().toString().padStart(2, '0')\n  const min = d.getMinutes().toString().padStart(2, '0')\n  return `${yyyy}/${mm}/${dd} ${hh}:${min}`\n}\n\n/**\n * 將 deadline 格式化為 \"YYYY/MM/DD HH:mm\" 格式\n * @param {string} deadline\n * @returns {string}\n */\nfunction formatDeadline(deadline) {\n  if (!deadline) return ''\n  const normalized = deadline.replace(' ', 'T')\n  const d = new Date(normalized)\n  if (isNaN(d.getTime())) return deadline\n  const yyyy = d.getFullYear()\n  const mm = (d.getMonth() + 1).toString().padStart(2, '0')\n  const dd = d.getDate().toString().padStart(2, '0')\n  const hh = d.getHours().toString().padStart(2, '0')\n  const min = d.getMinutes().toString().padStart(2, '0')\n  return `${yyyy}/${mm}/${dd} ${hh}:${min}`\n}\n\n/**\n * 細項勾選切換，發送 update 事件\n * @param {number} idx - 細項索引\n * @fires update\n */"
+          "jsdoc": "/**\n * 卡片組件 Card.vue\n * 顯示單一任務卡片內容，包含標題、描述、細項、日期與操作 icon。\n * - 支援「即將到期」與「提醒」icon，並有 CSS3 tooltip。\n * - 支援編輯、刪除、細項切換等互動。\n * @module Card\n * @prop {Object} item - 任務資料物件，必填。包含標題、描述、日期、細項等。\n * @prop {String} listTitle - 所屬清單名稱。\n * @event edit - 點擊編輯 icon 時發出，傳遞 item。\n * @event delete - 點擊刪除 icon 時發出，傳遞 item。\n * @event update - 細項勾選時發出，傳遞更新後的 item。\n */\nimport { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'\nimport { computed } from 'vue'\nconst emit = defineEmits(['edit', 'delete', 'update'])\nconst props = defineProps({\n  /**\n   * 任務卡片資料物件\n   * @type {Object}\n   */\n  item: {\n    type: Object,\n    required: true\n  },\n  /**\n   * 所屬清單名稱\n   * @type {String}\n   */\n  listTitle: {\n    type: String,\n    required: true\n  }\n})\n\n/**\n * 卡片狀態 class 計算屬性\n * - is-due: 即將到期\n * - is-overdue: 已逾期\n * - completed-card: 已完成\n */\nconst cardClasses = computed(() => ({\n  'is-due': isDue.value,\n  'is-overdue': isOverdue.value,\n  'completed-card': props.listTitle === '完成'\n}))\n\n/**\n * 取得日期 timestamp\n * @returns {number}\n */\nconst timestamp = computed(() => Number(new Date(props.item.deadline)))\n\n/**\n * 是否逾期\n * @returns {boolean}\n */\nconst isOverdue = computed(() => timestamp.value && timestamp.value < Date.now())\n\n/**\n * 是否進入即將到期區間（3天內）\n * @returns {boolean}\n */\nconst isDue = computed(() => {\n  const date = timestamp.value\n  const due = date - (1000 * 60 * 60 * 24) * 3\n  const now = Date.now()\n  return date > now && now > due\n})\n\n/**\n * 計算距離截止日剩餘小時數\n * @returns {number|null}\n */\nfunction getHoursLeft() {\n  if (!props.item.deadline) return null\n  const deadline = new Date(props.item.deadline).getTime()\n  const now = Date.now()\n  const diff = deadline - now\n  if (diff <= 0) return 0\n  return Math.ceil(diff / (1000 * 60 * 60))\n}\n\n/**\n * 發送編輯事件\n * @fires edit\n */\nfunction emitEdit() {\n  emit('edit', props.item)\n}\n/**\n * 發送刪除事件\n * @fires delete\n */\nfunction emitDelete() {\n  emit('delete', props.item)\n}\n/**\n * 將 created_at 格式 \"2025-05-02 11:17:49\" 轉為 \"2025/05/02 11:17\"\n * 支援後端回傳的 SQL DATETIME 格式\n * @param {string} createdAt\n * @returns {string}\n */\nfunction formatCreatedAt(createdAt) {\n  if (!createdAt) return ''\n  \n  try {\n    // 標準化日期字串，確保能被 Date 物件正確解析\n    // 先將日期字串標準化為 ISO 格式\n    const normalized = createdAt.replace(' ', 'T')\n    \n    // 將本地日期轉換為 Date 物件\n    const d = new Date(normalized)\n    \n    // 檢查日期是否有效\n    if (isNaN(d.getTime())) {\n      console.warn('無效的日期格式', createdAt)\n      return createdAt || ''\n    }\n    \n    // 格式化為 2025/05/02 11:17 格式\n    const yyyy = d.getFullYear()\n    const mm = (d.getMonth() + 1).toString().padStart(2, '0')\n    const dd = d.getDate().toString().padStart(2, '0')\n    const hh = d.getHours().toString().padStart(2, '0')\n    const min = d.getMinutes().toString().padStart(2, '0')\n    \n    return `${yyyy}/${mm}/${dd} ${hh}:${min}`\n  } catch (e) {\n    console.error('日期格式化錯誤', e)\n    return createdAt || ''\n  }\n}\n\n/**\n * 將 deadline 格式化為 \"YYYY/MM/DD HH:mm\" 格式（包含時間）\n * @param {string} deadline\n * @returns {string}\n */\nfunction formatDeadline(deadline) {\n  if (!deadline) return ''\n  \n  try {\n    // 嘗試處理不同的日期格式\n    // 如果日期只有 YYYY-MM-DD 格式，無需轉換為 ISO\n    let d;\n    \n    if (deadline.includes('T') || deadline.includes(' ')) {\n      // 包含時間的日期格式 (YYYY-MM-DD HH:MM:SS 或 ISO)\n      const normalized = deadline.replace(' ', 'T')\n      d = new Date(normalized)\n    } else {\n      // 純日期格式 (YYYY-MM-DD)\n      d = new Date(deadline)\n    }\n    \n    // 檢查日期是否有效\n    if (isNaN(d.getTime())) {\n      console.warn('無效的截止日期格式', deadline)\n      return deadline\n    }\n    \n    // 對截止日期顯示完整的日期和時間\n    const yyyy = d.getFullYear()\n    const mm = (d.getMonth() + 1).toString().padStart(2, '0')\n    const dd = d.getDate().toString().padStart(2, '0')\n    const hh = d.getHours().toString().padStart(2, '0')\n    const min = d.getMinutes().toString().padStart(2, '0')\n    \n    return `${yyyy}/${mm}/${dd} ${hh}:${min}`\n  } catch (e) {\n    console.error('截止日期格式化錯誤', e)\n    return deadline || ''\n  }\n}\n/**\n * 細項勾選切換，發送 update 事件\n * @param {number} idx - 細項索引\n * @fires update\n */"
+        }
+      ]
+    },
+    "components/NotificationSettings.vue": {
+      "props": [],
+      "emits": [],
+      "functions": [
+        {
+          "name": "testEmail",
+          "jsdoc": ""
+        },
+        {
+          "name": "saveSettings",
+          "jsdoc": "// 載入現有設定\nonMounted(() => {\n  const savedPrefs = notificationService.loadPreferences()\n  Object.assign(preferences, savedPrefs)\n  \n  if (authStore.user?.email) {\n    emailAddress.value = authStore.user.email\n  }\n})\n\nconst isValidEmail = computed(() => {\n  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/\n  return emailRegex.test(emailAddress.value)\n})\n\nasync function testEmail() {\n  if (!isValidEmail.value) return\n  \n  try {\n    emailMessage.value = '正在發送測試郵件...'\n    emailStatus.value = 'pending'\n    \n    await notificationService.testEmail(emailAddress.value)\n    \n    emailMessage.value = '測試郵件已發送，請檢查您的郵箱'\n    emailStatus.value = 'success'\n  } catch (error) {\n    emailMessage.value = `發送失敗: ${error.message}`\n    emailStatus.value = 'error'\n  }\n}"
         }
       ]
     },
@@ -675,6 +736,11 @@
     },
     "services/apiService.js": {
       "exports": [
+        "get",
+        "post",
+        "put",
+        "del",
+        "healthCheck",
         "login",
         "getBoards",
         "getBoard",
@@ -691,10 +757,29 @@
         "getCard",
         "createCard",
         "updateCard",
-        "deleteCard",
-        "healthCheck"
+        "deleteCard"
       ],
       "functions": [
+        {
+          "name": "get",
+          "jsdoc": ""
+        },
+        {
+          "name": "post",
+          "jsdoc": ""
+        },
+        {
+          "name": "put",
+          "jsdoc": ""
+        },
+        {
+          "name": "del",
+          "jsdoc": ""
+        },
+        {
+          "name": "healthCheck",
+          "jsdoc": ""
+        },
         {
           "name": "login",
           "jsdoc": ""
@@ -762,12 +847,12 @@
         {
           "name": "deleteCard",
           "jsdoc": ""
-        },
-        {
-          "name": "healthCheck",
-          "jsdoc": ""
         }
       ]
+    },
+    "services/notificationService.js": {
+      "exports": [],
+      "functions": []
     }
   },
   "stores": {
@@ -777,7 +862,16 @@
     },
     "stores/auth.js": {
       "state": [],
-      "actions": []
+      "actions": [
+        "login",
+        "login",
+        "if",
+        "setItem",
+        "stringify",
+        "setItem",
+        "dispatchEvent",
+        "Event"
+      ]
     },
     "stores/index.js": {
       "state": [],

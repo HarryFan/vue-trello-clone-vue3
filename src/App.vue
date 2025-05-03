@@ -1,51 +1,61 @@
 <template>
-  <router-view></router-view>
+  <router-view />
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
-import { useAuthStore } from '@/stores/auth'
-import { NotificationService } from '@/services/notificationService'
-import { healthCheck } from '@/services/apiService'
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { healthCheck, initApi } from '@/services/apiService'
 
-const authStore = useAuthStore()
-const notificationService = ref(null)
-
-// 當用戶登入後啟動通知服務
-onMounted(() => {
-  if (authStore.isAuthenticated()) {
-    notificationService.value = new NotificationService()
-    notificationService.value.startPolling()
+onMounted(async () => {
+  try {
+    // 動態檢測並初始化 API 端點
+    await initApi()
+    await healthCheck()
+    console.log('API 連線成功')
+  } catch (error) {
+    console.error('API 連線失敗', error)
   }
 })
-
-// 當用戶登出時停止通知服務
-onUnmounted(() => {
-  if (notificationService.value) {
-    notificationService.value.stopPolling()
-  }
-})
-
-// 健康檢查
-healthCheck()
-  .then(res => {
-    console.log(res.data)
-  })
-  .catch(err => {
-    console.error('API 連線失敗', err)
-  })
 </script>
 
 <style>
-#app {
-  font-family: 'Noto Sans TC', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+* {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
-  background-color: #f8fafc;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  background-color: #f8f9fa;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
