@@ -18,11 +18,16 @@ const api = axios.create({
   },
 })
 
-// 添加請求攔截器，自動添加 token
+// 添加請求攔截器，自動添加 token 和 user id
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('trello_token')
+  const userId = localStorage.getItem('trello_user_id')
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
+  }
+  if (userId) {
+    config.headers['X-User-Id'] = userId
   }
   return config
 })
@@ -81,13 +86,21 @@ export function getCard(id) {
   return api.get(`cards/${id}`)
 }
 export function createCard(listId, data) {
-  return api.post(`lists/${listId}/cards`, data)
+  return api.post(`lists/${listId}/cards`, {
+    ...data,
+    list_id: listId
+  })
 }
 export function updateCard(id, data) {
   return api.put(`cards/${id}`, data)
 }
 export function deleteCard(id) {
   return api.delete(`cards/${id}`)
+}
+
+// 通知相關
+export function getUpcomingTasks() {
+  return api.get('notifications/upcoming')
 }
 
 // 健康檢查
@@ -117,5 +130,6 @@ export default {
   createCard,
   updateCard,
   deleteCard,
+  getUpcomingTasks,
   healthCheck,
 }

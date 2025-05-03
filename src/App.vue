@@ -1,13 +1,35 @@
 <template>
-  <router-view />
+  <router-view></router-view>
 </template>
 
 <script setup>
+import { onMounted, onUnmounted, ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { NotificationService } from '@/services/notificationService'
 import { healthCheck } from '@/services/apiService'
 
+const authStore = useAuthStore()
+const notificationService = ref(null)
+
+// 當用戶登入後啟動通知服務
+onMounted(() => {
+  if (authStore.isAuthenticated()) {
+    notificationService.value = new NotificationService()
+    notificationService.value.startPolling()
+  }
+})
+
+// 當用戶登出時停止通知服務
+onUnmounted(() => {
+  if (notificationService.value) {
+    notificationService.value.stopPolling()
+  }
+})
+
+// 健康檢查
 healthCheck()
   .then(res => {
-    console.log(res.data) // 應顯示 { status: 'ok', message: 'API service 運作正常' }
+    console.log(res.data)
   })
   .catch(err => {
     console.error('API 連線失敗', err)
@@ -15,17 +37,15 @@ healthCheck()
 </script>
 
 <style>
-body {
-  font-family: 'Segoe UI', 'PingFang TC', 'Helvetica Neue', Arial, '微軟正黑體', sans-serif;
-  background: #f2f7fb;
-  margin: 0;
-}
-
 #app {
-  padding: 32px 0 32px 0;
-  max-width: 1440px;
-  margin: 0 auto;
+  font-family: 'Noto Sans TC', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin: 0;
+  padding: 0;
   min-height: 100vh;
-  box-sizing: border-box;
+  background-color: #f8fafc;
 }
 </style>

@@ -205,8 +205,19 @@ function onFormSubmit(data) { formDialog.edit && formDialog.editId ? boardStore.
 function closeForm() { formDialog.visible = false; formDialog.data = {}; formDialog.edit = false; formDialog.editId = null }
 // 刪除卡片
 function deleteItem(listId, itemId) { boardStore.deleteItem(listId, itemId) }
-// 更新卡片內容
-function updateItem(listId, item) { boardStore.updateItem(listId, item) }
+// 更新卡片
+const updateItem = async (listId, updatedItem) => {
+  try {
+    // 確保更新時包含 list_id
+    const itemToUpdate = {
+      ...updatedItem,
+      list_id: listId
+    }
+    await boardStore.updateItem(listId, itemToUpdate)
+  } catch (error) {
+    console.error('更新卡片失敗:', error)
+  }
+}
 // 開啟卡片詳情
 function openDetail(item, list) { detailDialog.item = { ...item }; detailDialog.listTitle = list.title; detailDialog.visible = true }
 // 關閉卡片詳情

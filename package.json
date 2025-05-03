@@ -1,7 +1,7 @@
 {
   "name": "vue-trello-clone-vue3",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,22 +9,24 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.7.2",
-    "@fortawesome/free-solid-svg-icons": "^6.7.2",
-    "@fortawesome/vue-fontawesome": "^3.0.8",
-    "axios": "^1.9.0",
-    "pinia": "^3.0.2",
-    "vue": "^3.5.13",
-    "vue-router": "^4.5.1",
-    "vue3-dnd": "^2.1.0",
+    "@fortawesome/fontawesome-svg-core": "^6.5.1",
+    "@fortawesome/free-regular-svg-icons": "^6.5.1",
+    "@fortawesome/free-solid-svg-icons": "^6.5.1",
+    "@fortawesome/vue-fontawesome": "^3.0.5",
+    "@vuepic/vue-datepicker": "^11.0.2",
+    "axios": "^1.6.7",
+    "element-plus": "^2.5.6",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.15",
+    "vue-router": "^4.2.5",
     "vue3-draggable-next": "^4.1.4",
-    "vue3-smooth-dnd": "^0.0.6"
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",
     "@types/node": "^22.15.2",
-    "@vitejs/plugin-vue": "^5.2.2",
-    "sass-embedded": "^1.87.0",
-    "vite": "^6.3.1"
+    "@vitejs/plugin-vue": "^4.5.2",
+    "sass": "^1.71.0",
+    "vite": "^4.5.2"
   }
 }
